@@ -16,6 +16,7 @@ import DiningPage from "@/pages/DiningPage";
 import EventsPage from "@/pages/EventsPage";
 import LoyaltyPage from "@/pages/LoyaltyPage";
 import AccountPage from "@/pages/AccountPage";
+import MembersManagement from "@/pages/MembersManagement";
 import NotFound from "@/pages/not-found";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -46,32 +47,46 @@ function Router({ userType }: { userType: "member" | "admin" }) {
   return (
     <Switch>
       <Route path="/" component={userType === "member" ? MemberDashboard : AdminDashboard} />
-      <Route path="/dashboard" component={userType === "member" ? MemberDashboard : AdminDashboard} />
+      
+      {/* Member Routes */}
       {userType === "member" && (
         <>
+          <Route path="/dashboard" component={MemberDashboard} />
           <Route path="/book-tee-time" component={BookTeeTime} />
           <Route path="/my-bookings" component={BookingPage} />
-          <Route path="/shop" component={() => <div className="p-6">Golf Shop</div>} />
+          <Route path="/shop" component={() => <div className="p-6">Golf Shop - Coming Soon</div>} />
           <Route path="/dining" component={DiningPage} />
           <Route path="/events" component={EventsPage} />
-          <Route path="/academy" component={() => <div className="p-6">Golf Academy</div>} />
-          <Route path="/tournaments" component={() => <div className="p-6">Tournaments</div>} />
-          <Route path="/handicap" component={() => <div className="p-6">My Handicap</div>} />
+          <Route path="/academy" component={() => <div className="p-6">Golf Academy - Coming Soon</div>} />
+          <Route path="/tournaments" component={() => <div className="p-6">Tournaments - Coming Soon</div>} />
+          <Route path="/handicap" component={() => <div className="p-6">My Handicap - Coming Soon</div>} />
           <Route path="/profile" component={AccountPage} />
         </>
       )}
+
+      {/* Admin Routes */}
       {userType === "admin" && (
         <>
-          <Route path="/members" component={() => <div className="p-6">Members Management Page</div>} />
-          <Route path="/bookings" component={() => <div className="p-6">Bookings Management Page</div>} />
-          <Route path="/caddies" component={() => <div className="p-6">Caddies Management Page</div>} />
-          <Route path="/dining" component={() => <div className="p-6">Dining Management Page</div>} />
-          <Route path="/events" component={() => <div className="p-6">Events Management Page</div>} />
-          <Route path="/billing" component={() => <div className="p-6">Billing Management Page</div>} />
-          <Route path="/analytics" component={() => <div className="p-6">Analytics Page</div>} />
-          <Route path="/settings" component={() => <div className="p-6">Settings Page</div>} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/members" component={MembersManagement} />
+          <Route path="/admin/tee-times" component={() => <div className="p-6">Tee Times Management - Coming Soon</div>} />
+          <Route path="/admin/tournaments" component={() => <div className="p-6">Tournaments Management - Coming Soon</div>} />
+          <Route path="/admin/shop" component={() => <div className="p-6">Shop Management - Coming Soon</div>} />
+          <Route path="/admin/dining" component={() => <div className="p-6">Dining Management - Coming Soon</div>} />
+          <Route path="/admin/events" component={() => <div className="p-6">Events Management - Coming Soon</div>} />
+          <Route path="/admin/course-setup" component={() => <div className="p-6">Course Setup - Coming Soon</div>} />
+          <Route path="/admin/staff" component={() => <div className="p-6">Staff Management - Coming Soon</div>} />
+          <Route path="/admin/billing" component={() => <div className="p-6">Billing Management - Coming Soon</div>} />
+          <Route path="/admin/analytics" component={() => <div className="p-6">Analytics - Coming Soon</div>} />
+          <Route path="/admin/settings" component={() => <div className="p-6">Settings - Coming Soon</div>} />
+          
+          {/* Redirect old routes to new admin routes */}
+          <Route path="/members" component={MembersManagement} />
+          <Route path="/bookings" component={() => <div className="p-6">Bookings Management - Coming Soon</div>} />
+          <Route path="/caddies" component={() => <div className="p-6">Caddies Management - Coming Soon</div>} />
         </>
       )}
+      
       <Route component={NotFound} />
     </Switch>
   );

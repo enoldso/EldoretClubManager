@@ -72,6 +72,12 @@ export default function AppSidebar({ userType, userName = "User", userAvatar, on
     { title: "Settings", icon: Settings, url: "/admin/settings" },
   ];
 
+  // Update active state to handle nested routes
+  const isActive = (url: string) => {
+    if (url === '/') return location === '/';
+    return location === url || location.startsWith(`${url}/`);
+  };
+
   const menuItems = userType === "member" ? memberMenuItems : adminMenuItems;
 
   return (
@@ -94,7 +100,11 @@ export default function AppSidebar({ userType, userName = "User", userAvatar, on
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild active={location === item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url)}
+                    className="w-full justify-start"
+                  >
                     <a 
                       href={item.url} 
                       className="flex items-center gap-3 w-full"

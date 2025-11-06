@@ -160,57 +160,59 @@ export default function AdminDashboard() {
     }
   ];
 
-  const columns: ColumnDef<Booking>[] = [
+  const tableColumns = [
     { 
       key: 'id', 
-      header: 'Booking ID',
-      cell: ({ row }) => <span className="font-medium">{row.original.id}</span>
+      label: 'Booking ID',
+      render: (value: string, row: Booking) => (
+        <span className="font-medium">{value}</span>
+      )
     },
     { 
       key: 'member', 
-      header: 'Member',
-      cell: ({ row }) => <span className="font-medium">{row.original.member}</span>
+      label: 'Member',
+      render: (value: string) => <span className="font-medium">{value}</span>
     },
     { 
       key: 'date', 
-      header: 'Date/Time',
-      cell: ({ row }) => (
+      label: 'Date/Time',
+      render: (value: string, row: Booking) => (
         <div className="flex flex-col">
-          <span>{row.original.date}</span>
-          <span className="text-sm text-muted-foreground">{row.original.time}</span>
+          <span>{value}</span>
+          <span className="text-sm text-muted-foreground">{row.time}</span>
         </div>
       )
     },
     { 
       key: 'course', 
-      header: 'Course',
-      cell: ({ row }) => (
-        <Badge variant={row.original.course === 'Championship' ? 'default' : 'secondary'}>
-          {row.original.course}
+      label: 'Course',
+      render: (value: string) => (
+        <Badge variant={value === 'Championship' ? 'default' : 'secondary'}>
+          {value}
         </Badge>
       )
     },
     { 
       key: 'players', 
-      header: 'Players',
-      cell: ({ row }) => <span className="text-center">{row.original.players}</span>
+      label: 'Players',
+      render: (value: number) => <span className="text-center">{value}</span>
     },
     { 
       key: 'caddie', 
-      header: 'Caddie',
-      cell: ({ row }) => <span className="hidden md:inline">{row.original.caddie}</span>
+      label: 'Caddie',
+      render: (value: string) => <span className="hidden md:inline">{value}</span>
     },
     {
       key: 'payment',
-      header: 'Payment',
-      cell: ({ row }) => {
+      label: 'Payment',
+      render: (value: string) => {
         const variants = {
           'Paid': 'default',
           'Pending': 'secondary',
           'Unpaid': 'destructive',
           'Refunded': 'outline'
         } as const;
-        const payment = row.original.payment as keyof typeof variants;
+        const payment = value as keyof typeof variants;
         return (
           <Badge variant={variants[payment] || 'secondary'}>
             {payment}
@@ -220,15 +222,15 @@ export default function AdminDashboard() {
     },
     {
       key: 'status',
-      header: 'Status',
-      cell: ({ row }) => {
+      label: 'Status',
+      render: (value: string) => {
         const variants = {
           'Confirmed': 'default',
           'Pending': 'secondary',
           'Cancelled': 'destructive',
           'Completed': 'outline'
         } as const;
-        const status = row.original.status as keyof typeof variants;
+        const status = value as keyof typeof variants;
         return (
           <Badge variant={variants[status] || 'secondary'}>
             {status}
@@ -236,38 +238,37 @@ export default function AdminDashboard() {
         );
       }
     }
-];
+  ];
 
-  const actions: TableAction[] = [
+  const tableActions = [
     { 
-      icon: 'view',
+      icon: 'view' as const, 
       label: 'View Details', 
       onClick: (row: Booking) => console.log('View:', row),
-      variant: 'ghost'
+      variant: 'ghost' as const
     },
     { 
-      icon: 'edit',
+      icon: 'edit' as const, 
       label: 'Modify Booking', 
       onClick: (row: Booking) => console.log('Edit:', row),
-      variant: 'outline'
+      variant: 'outline' as const
     },
     { 
-      icon: 'delete',
+      icon: 'delete' as const, 
       label: 'Cancel Booking', 
       onClick: (row: Booking) => console.log('Delete:', row),
-      variant: 'destructive'
+      variant: 'destructive' as const
     }
   ];
 
   return (
-    <>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your club today.
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back! Here's what's happening with your club today.
+        </p>
+      </div>
 
       <DashboardStats stats={stats} />
 
@@ -286,38 +287,42 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <DataTable 
-              columns={columns}
+              title="Today's Tee Times"
+              description={`Showing ${Math.min(5, recentBookings.length)} of ${recentBookings.length} bookings`}
+              columns={tableColumns}
               data={recentBookings}
-              actions={actions}
-              pageSize={5}
-              searchKey="member"
-              filterOptions={[
-                {
-                  id: 'status',
-                  title: 'Status',
-                  options: [
-                    { label: 'Confirmed', value: 'Confirmed' },
-                    { label: 'Pending', value: 'Pending' },
-                    { label: 'Cancelled', value: 'Cancelled' },
-                  ],
-                },
-                {
-                  id: 'payment',
-                  title: 'Payment',
-                  options: [
-                    { label: 'Paid', value: 'Paid' },
-                    { label: 'Pending', value: 'Pending' },
-                    { label: 'Unpaid', value: 'Unpaid' },
-                    { label: 'Refunded', value: 'Refunded' },
-                  ],
-                },
-              ]}
+              actions={tableActions}
             />
           </CardContent>
         </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+              <Calendar className="h-6 w-6" />
+              <span>New Booking</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+              <Users className="h-6 w-6" />
+              <span>Add Member</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+              <DollarSign className="h-6 w-6" />
+              <span>Process Payment</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Manage Staff</span>
+            </Button>
+          </CardContent>
+        </Card>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">

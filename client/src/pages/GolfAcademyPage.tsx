@@ -16,41 +16,172 @@ type Lesson = {
 };
 
 const lessons: Lesson[] = [
+  // Beginner Lessons
   {
-    id: "1",
-    title: "Beginner Golf Fundamentals",
-    instructor: "John Smith",
+    id: "b1",
+    title: "First Swing - Introduction to Golf",
+    instructor: "David Wilson",
     date: "2025-11-15",
-    time: "10:00 AM",
+    time: "9:00 AM",
     duration: "1.5 hours",
     level: "Beginner",
-    price: 75,
-    location: "Driving Range",
-    availableSpots: 4,
+    price: 65,
+    location: "Practice Range",
+    availableSpots: 5,
   },
   {
-    id: "2",
-    title: "Short Game Mastery",
-    instructor: "Sarah Johnson",
+    id: "b2",
+    title: "Golf 101: The Complete Basics",
+    instructor: "Emma Thompson",
     date: "2025-11-16",
+    time: "11:00 AM",
+    duration: "2 hours",
+    level: "Beginner",
+    price: 75,
+    location: "Short Game Area",
+    availableSpots: 3,
+  },
+  
+  // Intermediate Lessons
+  {
+    id: "i1",
+    title: "Iron Play Masterclass",
+    instructor: "James Rodriguez",
+    date: "2025-11-17",
     time: "2:00 PM",
     duration: "2 hours",
     level: "Intermediate",
     price: 95,
-    location: "Chipping Green",
+    location: "Iron Range",
+    availableSpots: 4,
+  },
+  {
+    id: "i2",
+    title: "Short Game Wizardry",
+    instructor: "Sarah Johnson",
+    date: "2025-11-18",
+    time: "3:30 PM",
+    duration: "2 hours",
+    level: "Intermediate",
+    price: 110,
+    location: "Short Game Area",
+    availableSpots: 2,
+  },
+  
+  // Advanced Lessons
+  {
+    id: "a1",
+    title: "Advanced Driving Techniques",
+    instructor: "Michael Chen",
+    date: "2025-11-19",
+    time: "10:00 AM",
+    duration: "2.5 hours",
+    level: "Advanced",
+    price: 135,
+    location: "Driving Range",
+    availableSpots: 3,
+  },
+  {
+    id: "a2",
+    title: "Course Management & Strategy",
+    instructor: "Robert Taylor",
+    date: "2025-11-20",
+    time: "1:00 PM",
+    duration: "3 hours",
+    level: "Advanced",
+    price: 150,
+    location: "On-Course",
+    availableSpots: 4,
+  },
+  
+  // Specialty Clinics
+  {
+    id: "s1",
+    title: "Women's Golf Clinic",
+    instructor: "Lisa Williams",
+    date: "2025-11-21",
+    time: "9:30 AM",
+    duration: "2 hours",
+    level: "All Levels",
+    price: 85,
+    location: "Practice Range",
+    availableSpots: 6,
+  },
+  {
+    id: "s2",
+    title: "Junior Golf Camp (Ages 10-15)",
+    instructor: "Tom Wilson",
+    date: "2025-11-22",
+    time: "10:00 AM",
+    duration: "3 hours",
+    level: "Junior",
+    price: 65,
+    location: "Junior Academy",
+    availableSpots: 8,
+  },
+  {
+    id: "s3",
+    title: "Senior Golfers Workshop",
+    instructor: "Richard Brown",
+    date: "2025-11-23",
+    time: "11:00 AM",
+    duration: "2 hours",
+    level: "Senior",
+    price: 70,
+    location: "Short Game Area",
+    availableSpots: 5,
+  },
+  
+  // Weekend Specials
+  {
+    id: "w1",
+    title: "Weekend Short Game Intensive",
+    instructor: "Sarah Johnson",
+    date: "2025-11-29",
+    time: "9:00 AM",
+    duration: "4 hours",
+    level: "All Levels",
+    price: 175,
+    location: "Short Game Area",
+    availableSpots: 4,
+  },
+  {
+    id: "w2",
+    title: "Saturday Morning Scramble",
+    instructor: "Michael Chen",
+    date: "2025-11-30",
+    time: "8:00 AM",
+    duration: "5 hours",
+    level: "Intermediate+",
+    price: 195,
+    location: "On-Course",
+    availableSpots: 3,
+  },
+  
+  // New for 2025
+  {
+    id: "n1",
+    title: "TrackMan Swing Analysis",
+    instructor: "James Rodriguez",
+    date: "2025-12-01",
+    time: "1:00 PM",
+    duration: "1.5 hours",
+    level: "All Levels",
+    price: 125,
+    location: "Indoor Simulator",
     availableSpots: 2,
   },
   {
-    id: "3",
-    title: "Advanced Driving Techniques",
-    instructor: "Mike Davis",
-    date: "2025-11-17",
-    time: "3:30 PM",
+    id: "n2",
+    title: "Mental Game Workshop",
+    instructor: "Emma Thompson",
+    date: "2025-12-02",
+    time: "5:00 PM",
     duration: "2 hours",
-    level: "Advanced",
-    price: 120,
-    location: "Driving Range",
-    availableSpots: 6,
+    level: "All Levels",
+    price: 85,
+    location: "Clubhouse",
+    availableSpots: 10,
   },
 ];
 
@@ -62,7 +193,9 @@ export default function GolfAcademyPage() {
         <p className="text-muted-foreground">Improve your game with our professional golf instructors</p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Upcoming Group Lessons</h2>
+        <div className="grid gap-6">
         {lessons.map((lesson) => (
           <Card key={lesson.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
@@ -102,6 +235,79 @@ export default function GolfAcademyPage() {
             </CardContent>
           </Card>
         ))}
+        </div>
+      </div>
+
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Our Instructors</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            {
+              name: "Sarah Johnson",
+              title: "Head Teaching Professional",
+              bio: "PGA Class A Professional with 15+ years of teaching experience. Specializes in short game and course management.",
+              students: "500+",
+              image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3"
+            },
+            {
+              name: "Michael Chen",
+              title: "Director of Instruction",
+              bio: "Former collegiate player with expertise in swing mechanics and power generation. Trained under top 100 teachers.",
+              students: "300+",
+              image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3"
+            },
+            {
+              name: "Emma Thompson",
+              title: "LPGA Teaching Professional",
+              bio: "Specializes in junior development and women's golf programs. Passionate about growing the game.",
+              students: "400+",
+              image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3"
+            },
+            {
+              name: "James Rodriguez",
+              title: "Short Game Specialist",
+              bio: "Short game wizard with a focus on scoring. Has helped numerous players lower their handicaps significantly.",
+              students: "350+",
+              image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3"
+            },
+            {
+              name: "Lisa Williams",
+              title: "Junior Program Director",
+              bio: "US Kids Certified Instructor. Creates fun and engaging programs for junior golfers of all skill levels.",
+              students: "250+",
+              image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3"
+            },
+            {
+              name: "Robert Taylor",
+              title: "Senior Instructor",
+              bio: "Specializes in senior golfers and players with physical limitations. Focus on efficient, pain-free golf.",
+              students: "600+",
+              image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3"
+            },
+          ].map((instructor, index) => (
+            <Card key={index} className="overflow-hidden">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src={instructor.image} 
+                  alt={instructor.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle>{instructor.name}</CardTitle>
+                <p className="text-sm text-muted-foreground">{instructor.title}</p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-4">{instructor.bio}</p>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Students Trained:</span>
+                  <span className="font-medium">{instructor.students}</span>
+                </div>
+                <Button variant="outline" className="w-full mt-4">View Profile</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <div className="mt-12 bg-muted/50 p-6 rounded-lg">

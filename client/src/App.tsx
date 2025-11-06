@@ -11,6 +11,7 @@ import LoginForm from "@/components/LoginForm";
 import MemberDashboard from "@/pages/MemberDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BookingPage from "@/pages/BookingPage";
+import BookTeeTime from "@/pages/BookTeeTime";
 import DiningPage from "@/pages/DiningPage";
 import EventsPage from "@/pages/EventsPage";
 import LoyaltyPage from "@/pages/LoyaltyPage";
@@ -48,11 +49,15 @@ function Router({ userType }: { userType: "member" | "admin" }) {
       <Route path="/dashboard" component={userType === "member" ? MemberDashboard : AdminDashboard} />
       {userType === "member" && (
         <>
-          <Route path="/booking" component={BookingPage} />
+          <Route path="/book-tee-time" component={BookTeeTime} />
+          <Route path="/my-bookings" component={BookingPage} />
+          <Route path="/shop" component={() => <div className="p-6">Golf Shop</div>} />
           <Route path="/dining" component={DiningPage} />
           <Route path="/events" component={EventsPage} />
-          <Route path="/loyalty" component={LoyaltyPage} />
-          <Route path="/account" component={AccountPage} />
+          <Route path="/academy" component={() => <div className="p-6">Golf Academy</div>} />
+          <Route path="/tournaments" component={() => <div className="p-6">Tournaments</div>} />
+          <Route path="/handicap" component={() => <div className="p-6">My Handicap</div>} />
+          <Route path="/profile" component={AccountPage} />
         </>
       )}
       {userType === "admin" && (

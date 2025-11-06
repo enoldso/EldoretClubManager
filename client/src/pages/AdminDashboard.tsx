@@ -1,10 +1,22 @@
-import DashboardStats from "@/components/DashboardStats";
-import DataTable from "@/components/DataTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, DollarSign, TrendingUp, Utensils, Trophy, Eye, Pencil, Trash2 } from "lucide-react";
-import type { ColumnDef } from "@/components/DataTable";
+import { Users, Calendar, DollarSign, TrendingUp, Utensils, Trophy, Plus, Search, Filter, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Booking = {
   id: string;
@@ -160,139 +172,196 @@ export default function AdminDashboard() {
     }
   ];
 
-  const tableColumns = [
-    { 
-      key: 'id', 
-      label: 'Booking ID',
-      render: (value: string, row: Booking) => (
-        <span className="font-medium">{value}</span>
-      )
-    },
-    { 
-      key: 'member', 
-      label: 'Member',
-      render: (value: string) => <span className="font-medium">{value}</span>
-    },
-    { 
-      key: 'date', 
-      label: 'Date/Time',
-      render: (value: string, row: Booking) => (
-        <div className="flex flex-col">
-          <span>{value}</span>
-          <span className="text-sm text-muted-foreground">{row.time}</span>
-        </div>
-      )
-    },
-    { 
-      key: 'course', 
-      label: 'Course',
-      render: (value: string) => (
-        <Badge variant={value === 'Championship' ? 'default' : 'secondary'}>
-          {value}
-        </Badge>
-      )
-    },
-    { 
-      key: 'players', 
-      label: 'Players',
-      render: (value: number) => <span className="text-center">{value}</span>
-    },
-    { 
-      key: 'caddie', 
-      label: 'Caddie',
-      render: (value: string) => <span className="hidden md:inline">{value}</span>
+  const columns = [
+    {
+      accessorKey: 'id',
+      header: 'Booking ID',
     },
     {
-      key: 'payment',
-      label: 'Payment',
-      render: (value: string) => {
-        const variants = {
+      accessorKey: 'member',
+      header: 'Member',
+    },
+    {
+      accessorKey: 'date',
+      header: 'Date',
+    },
+    {
+      accessorKey: 'time',
+      header: 'Time',
+    },
+    {
+      accessorKey: 'course',
+      header: 'Course',
+      cell: ({ row }) => (
+        <Badge variant={row.original.course === 'Championship' ? 'default' : 'secondary'}>
+          {row.original.course}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'players',
+      header: 'Players',
+    },
+    {
+      accessorKey: 'caddie',
+      header: 'Caddie',
+    },
+    {
+      accessorKey: 'payment',
+      header: 'Payment',
+      cell: ({ row }) => {
+        const payment = row.original.payment;
+        const variant = {
           'Paid': 'default',
           'Pending': 'secondary',
           'Unpaid': 'destructive',
           'Refunded': 'outline'
-        } as const;
-        const payment = value as keyof typeof variants;
-        return (
-          <Badge variant={variants[payment] || 'secondary'}>
-            {payment}
-          </Badge>
-        );
-      }
+        }[payment] || 'secondary';
+        
+        return <Badge variant={variant}>{payment}</Badge>;
+      },
     },
     {
-      key: 'status',
-      label: 'Status',
-      render: (value: string) => {
-        const variants = {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        const status = row.original.status;
+        const variant = {
           'Confirmed': 'default',
           'Pending': 'secondary',
           'Cancelled': 'destructive',
           'Completed': 'outline'
-        } as const;
-        const status = value as keyof typeof variants;
-        return (
-          <Badge variant={variants[status] || 'secondary'}>
-            {status}
-          </Badge>
-        );
-      }
+        }[status] || 'secondary';
+        
+        return <Badge variant={variant}>{status}</Badge>;
+      },
     }
   ];
 
-  const tableActions = [
-    { 
-      icon: 'view' as const, 
-      label: 'View Details', 
-      onClick: (row: Booking) => console.log('View:', row),
-      variant: 'ghost' as const
+  const actions = [
+    {
+      label: 'View',
+      icon: Eye,
+      onClick: (row: Booking) => console.log('View:', row)
     },
-    { 
-      icon: 'edit' as const, 
-      label: 'Modify Booking', 
-      onClick: (row: Booking) => console.log('Edit:', row),
-      variant: 'outline' as const
+    {
+      label: 'Edit',
+      icon: Pencil,
+      onClick: (row: Booking) => console.log('Edit:', row)
     },
-    { 
-      icon: 'delete' as const, 
-      label: 'Cancel Booking', 
-      onClick: (row: Booking) => console.log('Delete:', row),
-      variant: 'destructive' as const
+    {
+      label: 'Delete',
+      icon: Trash2,
+      variant: 'destructive' as const,
+      onClick: (row: Booking) => console.log('Delete:', row)
     }
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back! Here's what's happening with your club today.
-        </p>
-      </div>
-
-      <DashboardStats stats={stats} />
+    <>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back! Here's what's happening with your club today.
+          </p>
+        </div>
 
       <div className="grid gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Today's Tee Times</CardTitle>
-            <CardDescription>
-              {recentBookings.length} bookings scheduled for {new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Today's Tee Times</CardTitle>
+              <CardDescription>
+                {recentBookings.length} bookings scheduled for {new Date().toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search bookings..."
+                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+                />
+              </div>
+              <Button variant="outline" size="sm" className="h-10">
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+              </Button>
+              <Button size="sm" className="h-10">
+                <Plus className="mr-2 h-4 w-4" />
+                New Booking
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <DataTable 
-              title="Today's Tee Times"
-              description={`Showing ${Math.min(5, recentBookings.length)} of ${recentBookings.length} bookings`}
-              columns={tableColumns}
-              data={recentBookings}
-              actions={tableActions}
-            />
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableHead key={column.accessorKey}>
+                        {column.header}
+                      </TableHead>
+                    ))}
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentBookings.length > 0 ? (
+                    recentBookings.map((booking) => (
+                      <TableRow key={booking.id}>
+                        {columns.map((column) => (
+                          <TableCell key={`${booking.id}-${column.accessorKey}`}>
+                            {column.cell ? (
+                              column.cell({ row: { original: booking } })
+                            ) : (
+                              booking[column.accessorKey as keyof Booking]
+                            )}
+                          </TableCell>
+                        ))}
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {actions.map((action) => {
+                                const Icon = action.icon;
+                                return (
+                                  <DropdownMenuItem
+                                    key={action.label}
+                                    onClick={() => action.onClick(booking)}
+                                    className={action.variant === 'destructive' ? 'text-destructive' : ''}
+                                  >
+                                    <Icon className="mr-2 h-4 w-4" />
+                                    {action.label}
+                                  </DropdownMenuItem>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={columns.length + 1} className="h-24 text-center">
+                        No bookings found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -323,33 +392,8 @@ export default function AdminDashboard() {
             </Button>
           </CardContent>
         </Card>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                <Calendar className="h-6 w-6" />
-                <span>New Booking</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                <Users className="h-6 w-6" />
-                <span>Add Member</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                <DollarSign className="h-6 w-6" />
-                <span>Process Payment</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span>Manage Staff</span>
-              </Button>
-            </CardContent>
-          </Card>
 
-          <Card>
+        <Card>
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
                 <div>

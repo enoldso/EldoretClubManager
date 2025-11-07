@@ -27,7 +27,6 @@ import {
   Home,
   GraduationCap,
   UserCog,
-  ShoppingBag,
   Clock
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -48,7 +47,6 @@ export default function AppSidebar({ userType, userName = "User", userAvatar, on
     { title: "Dashboard", icon: LayoutDashboard, url: "/dashboard" },
     { title: "Book Tee Time", icon: Flag, url: "/book-tee-time" },
     { title: "My Bookings", icon: Calendar, url: "/my-bookings" },
-    { title: "Golf Shop", icon: ShoppingBag, url: "/shop" },
     { title: "Dining", icon: Utensils, url: "/dining" },
     { title: "Events", icon: CalendarDays, url: "/events" },
     { title: "Golf Academy", icon: GraduationCap, url: "/academy" },
@@ -62,7 +60,6 @@ export default function AppSidebar({ userType, userName = "User", userAvatar, on
     { title: "Members", icon: Users, url: "/admin/members" },
     { title: "Tee Times", icon: Clock, url: "/admin/tee-times" },
     { title: "Tournaments", icon: Trophy, url: "/admin/tournaments" },
-    { title: "Golf Shop", icon: ShoppingBag, url: "/admin/shop" },
     { title: "Dining", icon: Utensils, url: "/admin/dining" },
     { title: "Events", icon: CalendarDays, url: "/admin/events" },
     { title: "Course Setup", icon: Flag, url: "/admin/course-setup" },

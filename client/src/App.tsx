@@ -16,6 +16,7 @@ import DiningPage from "@/pages/DiningPage";
 import EventsPage from "@/pages/EventsPage";
 import LoyaltyPage from "@/pages/LoyaltyPage";
 import AccountPage from "@/pages/AccountPage";
+import GolfAcademy from "@/pages/GolfAcademy";
 import MembersManagement from "@/pages/MembersManagement";
 import TeeTimesManagement from "@/pages/TeeTimesManagement";
 import TournamentsManagement from "@/pages/TournamentsManagement";
@@ -65,7 +66,7 @@ function Router({ userType }: { userType: "member" | "admin" }) {
           <Route path="/my-bookings" component={BookingPage} />
           <Route path="/dining" component={DiningPage} />
           <Route path="/events" component={EventsPage} />
-          <Route path="/academy" component={() => <div className="p-6">Golf Academy - Coming Soon</div>} />
+          <Route path="/academy" component={GolfAcademy} />
           <Route path="/tournaments" component={() => <div className="p-6">Tournaments - Coming Soon</div>} />
           <Route path="/handicap" component={() => <div className="p-6">My Handicap - Coming Soon</div>} />
           <Route path="/profile" component={AccountPage} />

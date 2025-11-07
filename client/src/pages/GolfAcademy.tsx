@@ -185,7 +185,7 @@ const upcomingEvents = [
     location: "Eldoret Golf Club Academy",
     ageGroup: "6-17 years",
     price: 500,
-    image: "/images/junior-open-day.jpg"
+    image: "https://images.unsplash.com/photo-1727122383197-71ec73d9a6cc?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fGNvYWNoJTIwZ29sZnxlbnwwfDB8MHx8fDI%3D&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 2,
@@ -196,7 +196,7 @@ const upcomingEvents = [
     location: "Eldoret Golf Club Academy",
     ageGroup: "16+",
     price: 1500,
-    image: "/images/womens-clinic.jpg"
+    image: "https://images.unsplash.com/photo-1668176886027-16de2f31e354?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHdvbWFuJTIwZ29sZnxlbnwwfDB8MHx8fDI%3D&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 3,
@@ -207,7 +207,7 @@ const upcomingEvents = [
     location: "Eldoret Golf Club",
     ageGroup: "All Ages",
     price: 2500,
-    image: "/images/parent-child-golf.jpg"
+    image: "https://images.unsplash.com/photo-1728953877727-3319598c0b8c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDN8fHdvbWFuJTIwZ29sZnxlbnwwfDB8MHx8fDI%3D&auto=format&fit=crop&q=60&w=500"
   }
 ];
 

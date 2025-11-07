@@ -21,7 +21,7 @@ const programs = [
     level: "Beginner",
     instructor: "Sarah Johnson",
     maxStudents: 8,
-    image: "/images/junior-golf.jpg"
+    image: "https://images.unsplash.com/photo-1649001712085-ecff1245c095?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8anVuaW9yJTIwZ29sZnxlbnwwfHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ const programs = [
     level: "Beginner",
     instructor: "Michael Ochieng",
     maxStudents: 6,
-    image: "/images/adult-clinic.jpg"
+    image: "https://images.unsplash.com/photo-1698692393564-08f2bcd78d8f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8anVuaW9yJTIwZ29sZnxlbnwwfDB8MHx8fDI%3D&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 3,
@@ -47,7 +47,7 @@ const programs = [
     level: "Advanced",
     instructor: "James Mwangi",
     maxStudents: 4,
-    image: "/images/advanced-golf.jpg"
+    image: "https://images.unsplash.com/photo-1600609292693-5154474f13fb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjJ8fGp1bmlvciUyMGdvbGZ8ZW58MHwwfDB8fHwy&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 4,
@@ -60,7 +60,7 @@ const programs = [
     level: "Intermediate",
     instructor: "Grace Wanjiku",
     maxStudents: 5,
-    image: "/images/short-game.jpg"
+    image: "https://images.unsplash.com/photo-1567019001814-57350903e2af?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDF8fGp1bmlvciUyMGdvbGZ8ZW58MHwwfDB8fHwy&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 5,
@@ -73,7 +73,7 @@ const programs = [
     level: "All Levels",
     instructor: "David Kamau",
     maxStudents: 10,
-    image: "/images/bootcamp.jpg"
+    image: "https://images.unsplash.com/photo-1605173257854-303c2a5fb050?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Njh8fGp1bmlvciUyMGdvbGZ8ZW58MHwwfDB8fHwy&auto=format&fit=crop&q=60&w=500"
   },
   {
     id: 6,
@@ -86,7 +86,7 @@ const programs = [
     level: "All Levels",
     instructor: "Various",
     maxStudents: 1,
-    image: "/images/private-lesson.jpg"
+    image: "https://images.unsplash.com/photo-1622819218586-ac7be4329653?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODl8fGp1bmlvciUyMGdvbGZ8ZW58MHwwfDB8fHwy&auto=format&fit=crop&q=60&w=500"
   }
 ];
 
@@ -94,10 +94,10 @@ const programs = [
 const coaches = [
   {
     id: 1,
-    name: "Sarah Johnson",
+    name: "Peter Johnson",
     title: "Head Golf Professional",
     bio: "PGA Class A Professional with 15+ years of teaching experience. Specializes in junior development and swing mechanics.",
-    image: "/images/coach-sarah.jpg",
+    image: "https://images.unsplash.com/photo-1596476097938-ea0f5aa417a5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8Y29hY2glMjBnb2xmfGVufDB8MHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500",
     specialties: ["Junior Golf", "Swing Mechanics", "Mental Game"],
     experience: "15 years",
     rating: 4.9,

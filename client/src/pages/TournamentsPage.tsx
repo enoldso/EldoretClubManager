@@ -55,7 +55,7 @@ const tournaments: Tournament[] = [
     status: "registration-open",
     participants: 42,
     maxParticipants: 120,
-    image: "/images/tournament-eldoret-masters.jpg",
+    image: "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z29sZnxlbnwwfHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500",
     description: "The most prestigious tournament of the year at Eldoret Golf Club. Open to all members and guests with an official handicap. This 36-hole stroke play championship will test your skills on our championship course. The event includes a gala dinner and prize giving ceremony.",
     rules: [
       "Official handicap required (max 24 for men, 36 for women)",
@@ -91,7 +91,7 @@ const tournaments: Tournament[] = [
     status: "registration-open",
     participants: 15,
     maxParticipants: 25,
-    image: "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    image: "https://images.unsplash.com/photo-1500932334442-8761ee4810a7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z29sZnxlbnwwfHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500",
     description: "Network and compete with other businesses in this exciting team event. Great for team building and corporate networking.",
     rules: [
       "Teams of 4 players (can be mixed gender)",
@@ -111,7 +111,7 @@ const tournaments: Tournament[] = [
     status: "upcoming",
     participants: 22,
     maxParticipants: 40,
-    image: "https://images.unsplash.com/photo-1600269452002-792e0b4ef0d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    image: "https://images.unsplash.com/photo-1602957417690-53488d19faa4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z29sZiUyMGNoaWxkcmVufGVufDB8fDB8fHwy&auto=format&fit=crop&q=60&w=500",
     description: "A fun and competitive tournament for junior golfers aged 8-18. Divisions by age group.",
     ageGroups: ["8-11", "12-15", "16-18"]
   },
@@ -126,7 +126,7 @@ const tournaments: Tournament[] = [
     status: "upcoming",
     participants: 18,
     maxParticipants: 40,
-    image: "https://images.unsplash.com/photo-1525450824786-227cbef70703?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+    image: "https://images.unsplash.com/photo-1677174502902-36d33ff99077?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Z29sZiUyMGxhZGllc3xlbnwwfHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500"
   },
   
   // Past Tournaments
@@ -141,7 +141,7 @@ const tournaments: Tournament[] = [
     status: "completed",
     participants: 96,
     maxParticipants: 120,
-    image: "/images/tournament-eldoret-open.jpg",
+    image: "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z29sZnxlbnwwfHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500",
     description: "The annual Eldoret Open attracted top amateur golfers from across the region for a thrilling 36-hole stroke play competition. The event was a great success with excellent course conditions and competitive scoring.",
     winners: [
       { name: "David Kimani", score: "-5 (139)", prize: "KSh 100,000 + Trophy" },
@@ -160,7 +160,7 @@ const tournaments: Tournament[] = [
     status: "completed",
     participants: 64,
     maxParticipants: 64,
-    image: "/images/tournament-charity.jpg",
+    image: "https://images.unsplash.com/photo-1746209843615-6b007f4ac00d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGdvbGYlMjBjaGFyaXR5fGVufDB8fDB8fHwy&auto=format&fit=crop&q=60&w=500",
     description: "Our annual charity event raised over KSh 2.5 million for local children's education. The Ambrose format created a fun and social atmosphere, with teams enjoying the beautiful course while supporting a great cause.",
     charity: "Eldoret Children's Education Fund",
     amountRaised: 2500000,
@@ -181,7 +181,7 @@ const tournaments: Tournament[] = [
     status: "completed",
     participants: 32,
     maxParticipants: 32,
-    image: "/images/tournament-presidents-cup.jpg",
+    image: "https://images.unsplash.com/photo-1706193589333-da530df63ecf?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHRyb3BoeXxlbnwwfHwwfHx8Mg%3D%3D&auto=format&fit=crop&q=60&w=500",
     description: "An exclusive match play tournament for club members. The event featured intense competition over three days, culminating in an exciting final match that went to the 18th hole.",
     winners: [
       { name: "John Kamau", score: "2&1", prize: "President's Trophy + KSh 50,000" },

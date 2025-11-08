@@ -232,6 +232,21 @@ const MemberDashboard: React.FC = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
+      {/* Hero Section with Image */}
+      <div className="relative rounded-xl overflow-hidden mb-6 h-64 md:h-80">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 z-10 flex items-center">
+          <div className="px-8 md:px-12 max-w-2xl">
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">Welcome to Eldoret Golf Club</h1>
+            <p className="text-gray-200 text-lg">Experience world-class golfing in the heart of Kenya</p>
+          </div>
+        </div>
+        <img 
+          src="https://images.unsplash.com/photo-1597865992644-549ae818bd01?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzl8fGdvbGZ8ZW58MHwwfDB8fHwy&auto=format&fit=crop&q=60&w=500" 
+          alt="Golf course at sunset"
+          className="w-full h-full object-cover"
+        />
+      </div>
+      
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { Calendar, User, Bell, Clock, MapPin, Users, CreditCard, Star } from 'lucide-react';
+import { Calendar, User, Bell, Clock, MapPin, Users, CreditCard, Star, X, RefreshCw, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 type Booking = {
   id: number;
@@ -15,10 +17,14 @@ type Booking = {
   course?: string;
   holes?: 9 | 18;
   cartIncluded?: boolean;
+  instructor?: string;
+  format?: string;
 };
 
 const MemberDashboard: React.FC = () => {
   const [_, navigate] = useLocation();
+  const [isLoading, setIsLoading] = useState<Record<number, boolean>>({});
+  const [showCancelModal, setShowCancelModal] = useState<number | null>(null);
   
   // Dummy data
   const memberStats = {
@@ -117,12 +123,82 @@ const MemberDashboard: React.FC = () => {
     },
   ];
 
+  // Function to handle booking actions
+  const handleBookingAction = async (bookingId: number, action: 'cancel' | 'reschedule' | 'view' | 'addToCalendar') => {
+    try {
+      setIsLoading(prev => ({ ...prev, [bookingId]: true }));
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      switch (action) {
+        case 'cancel':
+          toast.success('Booking cancelled successfully');
+          // In a real app, you would update the bookings list here
+          break;
+        case 'reschedule':
+          navigate(`/book-tee-time?reschedule=${bookingId}`);
+          break;
+        case 'view':
+          navigate(`/my-bookings/${bookingId}`);
+          break;
+        case 'addToCalendar':
+          const booking = upcomingBookings.find(b => b.id === bookingId);
+          if (booking) {
+            const startDate = new Date(`${booking.date}T${booking.time}`);
+            const endDate = new Date(startDate);
+            endDate.setHours(endDate.getHours() + 2); // 2 hour event
+            
+            const calendarEvent = {
+              title: booking.title,
+              description: `Location: ${booking.location}\nType: ${booking.type}`,
+              location: booking.location,
+              start: startDate.toISOString(),
+              end: endDate.toISOString(),
+            };
+            
+            // Create .ics file for download
+            const icsContent = [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'BEGIN:VEVENT',
+              `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+              `DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+              `SUMMARY:${booking.title}`,
+              `DESCRIPTION:${booking.type} at ${booking.location}`,
+              `LOCATION:${booking.location}`,
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\n');
+            
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `event-${booking.id}.ics`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            toast.success('Added to calendar');
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(prev => ({ ...prev, [bookingId]: false }));
+      setShowCancelModal(null);
+    }
+  };
+
   const quickActions = [
     { 
       id: 1, 
       title: 'Book Tee Time', 
       icon: <Calendar size={20} />, 
-      onClick: () => navigate('/book-golf') 
+      onClick: () => navigate('/book-tee-time') 
     },
     { 
       id: 2, 
@@ -296,10 +372,10 @@ const MemberDashboard: React.FC = () => {
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Upcoming Bookings</h2>
             <button 
-              onClick={() => navigate('/bookings')}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              onClick={() => navigate('/my-bookings')}
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/30 rounded-md"
             >
-              View All
+              View All Bookings
             </button>
           </div>
           
@@ -321,13 +397,71 @@ const MemberDashboard: React.FC = () => {
                       <span>{booking.guests} {booking.guests === 1 ? 'person' : 'people'}</span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    {getStatusBadge(booking.status, booking.type)}
-                    {renderBookingDetails(booking)}
-                    <button className="mt-2 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                      View Details
-                    </button>
+                  <div className="flex flex-col items-end space-y-2">
+                {getStatusBadge(booking.status, booking.type)}
+                {renderBookingDetails(booking)}
+                <div className="flex space-x-2 mt-2">
+                  <button 
+                    onClick={() => handleBookingAction(booking.id, 'view')}
+                    className="text-xs px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors dark:bg-blue-900/30 dark:hover:bg-blue-800/50 dark:text-blue-300"
+                    disabled={isLoading[booking.id]}
+                  >
+                    {isLoading[booking.id] ? 'Loading...' : 'View'}
+                  </button>
+                  <button 
+                    onClick={() => handleBookingAction(booking.id, 'addToCalendar')}
+                    className="text-xs p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                    title="Add to Calendar"
+                    disabled={isLoading[booking.id]}
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button 
+                    onClick={() => handleBookingAction(booking.id, 'reschedule')}
+                    className="text-xs p-1 text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400"
+                    title="Reschedule"
+                    disabled={isLoading[booking.id]}
+                  >
+                    <RefreshCw size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setShowCancelModal(booking.id)}
+                    className="text-xs p-1 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                    title="Cancel Booking"
+                    disabled={isLoading[booking.id]}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Cancel Booking Modal */}
+              {showCancelModal === booking.id && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+                    <h3 className="text-lg font-semibold mb-4 dark:text-white">Cancel Booking</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      Are you sure you want to cancel this booking? This action cannot be undone.
+                    </p>
+                    <div className="flex justify-end space-x-3">
+                      <button
+                        onClick={() => setShowCancelModal(null)}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                        disabled={isLoading[booking.id]}
+                      >
+                        No, Keep It
+                      </button>
+                      <button
+                        onClick={() => handleBookingAction(booking.id, 'cancel')}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+                        disabled={isLoading[booking.id]}
+                      >
+                        {isLoading[booking.id] ? 'Cancelling...' : 'Yes, Cancel'}
+                      </button>
+                    </div>
                   </div>
+                </div>
+              )}
                 </div>
               </div>
             ))}

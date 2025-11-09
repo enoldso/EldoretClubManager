@@ -3,6 +3,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import EditMemberPage from "@/pages/EditMemberPage";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
@@ -80,8 +81,9 @@ function Router({ userType }: { userType: "member" | "admin" }) {
       {userType === "admin" && (
         <>
           <Route path="/admin" component={AdminDashboard} />
-          <Route path="/members/new" component={AddMemberPage} /> // Added route
-          <Route path="/members" component={MembersManagement} />
+          <Route path="/admin/members/new" component={AddMemberPage} />
+          <Route path="/admin/members/edit/:id" component={EditMemberPage} />
+          <Route path="/admin/members" component={MembersManagement} />
           <Route path="/admin/tee-times" component={TeeTimesManagement} />
           <Route path="/admin/tournaments" component={TournamentsManagement} />
           <Route path="/admin/dining" component={DiningManagement} />
@@ -91,9 +93,15 @@ function Router({ userType }: { userType: "member" | "admin" }) {
           <Route path="/admin/billing" component={BillingManagement} />
           <Route path="/admin/analytics" component={AnalyticsManagement} />
           <Route path="/admin/settings" component={SettingsManagement} />
-          
+          <Route path="/admin/members" component={MembersManagement} />
+          <Route path="/admin/members/new" component={AddMemberPage} />
+          <Route path="/admin/members/edit/:id" component={EditMemberPage} />
           {/* Redirect old routes to new admin routes */}
-          <Route path="/members" component={MembersManagement} />
+          <Route path="/members" component={() => {
+            // Redirect to the new admin members route
+            window.location.href = '/admin/members';
+            return null;
+          }} />
           <Route path="/bookings" component={() => <div className="p-6">Bookings Management - Coming Soon</div>} />
           <Route path="/caddies" component={() => <div className="p-6">Caddies Management - Coming Soon</div>} />
         </>

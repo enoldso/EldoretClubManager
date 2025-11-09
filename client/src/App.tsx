@@ -31,6 +31,7 @@ import StaffManagement from "@/pages/admin/StaffManagement";
 import BillingManagement from "@/pages/admin/BillingManagement";
 import AnalyticsManagement from "@/pages/admin/AnalyticsManagement";
 import SettingsManagement from "@/pages/admin/SettingsManagement";
+import TeeTimeScoring from "@/pages/TeeTimeScoring";
 import NotFound from "@/pages/not-found";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -74,6 +75,7 @@ function Router({ userType }: { userType: "member" | "admin" }) {
           <Route path="/tournaments" component={TournamentsPage} />
           <Route path="/handicap" component={HandicapPage} />
           <Route path="/profile" component={AccountPage} />
+          <Route path="/tee-time-scoring" component={TeeTimeScoring} />
         </>
       )}
 

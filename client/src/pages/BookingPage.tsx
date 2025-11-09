@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import BookingCalendar from "@/components/BookingCalendar";
 import CaddieSelector from "@/components/CaddieSelector";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,19 +7,101 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Users, CheckCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Search, UserPlus, X, CheckCircle, Users, Plus } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Mock member data
+const mockMembers = [
+  {
+    id: 'M001',
+    name: 'Dr. James Mwangi',
+    email: 'james.mwangi@example.com',
+    phone: '+254 712 345 678',
+    avatar: '/avatars/avatar-1.jpg'
+  },
+  {
+    id: 'M002',
+    name: 'Sarah Wanjiku',
+    email: 'sarah.w@example.com',
+    phone: '+254 723 456 789',
+    avatar: '/avatars/avatar-2.jpg'
+  },
+  {
+    id: 'M003',
+    name: 'Michael Ochieng',
+    email: 'm.ochieng@example.com',
+    phone: '+254 734 567 890',
+    avatar: '/avatars/avatar-3.jpg'
+  },
+  {
+    id: 'M004',
+    name: 'Amina Hassan',
+    email: 'a.hassan@example.com',
+    phone: '+254 745 678 901',
+    avatar: '/avatars/avatar-4.jpg'
+  },
+];
+
+type InvitedMember = {
+  id: string;
+  name: string;
+  email: string;
+  status: 'pending' | 'accepted' | 'declined';
+};
 
 export default function BookingPage() {
+  const navigate = useNavigate();
   const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time: string } | null>(null);
   const [selectedCaddie, setSelectedCaddie] = useState<string | null>(null);
   const [partySize, setPartySize] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showMemberSearch, setShowMemberSearch] = useState(false);
+  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
+  const [availableMembers, setAvailableMembers] = useState(mockMembers);
+
+  const filteredMembers = availableMembers.filter(member => 
+    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    const invitedIds = new Set(invitedMembers.map(m => m.id));
+    setAvailableMembers(mockMembers.filter(member => !invitedIds.has(member.id)));
+  }, [invitedMembers]);
+
+  const handleInviteMember = (member: typeof mockMembers[0]) => {
+    setInvitedMembers(prev => [
+      ...prev, 
+      {
+        id: member.id,
+        name: member.name,
+        email: member.email,
+        status: 'pending'
+      }
+    ]);
+    setSearchTerm('');
+  };
+
+  const removeInvitedMember = (memberId: string) => {
+    setInvitedMembers(prev => prev.filter(m => m.id !== memberId));
+  };
 
   const handleBooking = () => {
     if (selectedSlot && selectedCaddie) {
       setShowConfirmation(true);
-      console.log('Booking confirmed:', { selectedSlot, selectedCaddie, partySize });
+      console.log('Booking confirmed:', { 
+        selectedSlot, 
+        selectedCaddie, 
+        partySize, 
+        invitedMembers 
+      });
     }
+  };
+
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
   };
 
   if (showConfirmation) {
@@ -56,16 +139,57 @@ export default function BookingPage() {
                   <p className="font-medium">BK-{Math.random().toString(36).substr(2, 6).toUpperCase()}</p>
                 </div>
               </div>
+              
+              {invitedMembers.length > 0 && (
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-muted-foreground mb-2">Invited Members</p>
+                  <div className="space-y-2">
+                    {invitedMembers.map(member => (
+                      <div key={member.id} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={`/avatars/avatar-${member.id.slice(-1)}.jpg`} />
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">{member.email}</p>
+                          </div>
+                        </div>
+                        <Badge 
+                          variant={
+                            member.status === 'accepted' 
+                              ? 'default' 
+                              : member.status === 'declined' 
+                                ? 'destructive' 
+                                : 'outline'
+                          }
+                        >
+                          {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <p className="text-sm text-muted-foreground">
               A confirmation email has been sent to your registered email address.
+              {invitedMembers.length > 0 && ' Invitations have been sent to the selected members.'}
             </p>
           </CardContent>
           <CardFooter className="flex gap-3 justify-center">
-            <Button variant="outline" onClick={() => setShowConfirmation(false)} data-testid="button-book-another">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowConfirmation(false)}
+              data-testid="button-book-another"
+            >
               Book Another
             </Button>
-            <Button onClick={() => window.location.hash = '#dashboard'} data-testid="button-view-bookings">
+            <Button 
+              onClick={handleBackToDashboard}
+              data-testid="button-view-bookings"
+            >
               View My Bookings
             </Button>
           </CardFooter>
@@ -97,18 +221,22 @@ export default function BookingPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="party-size">Party Size</Label>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="party-size">Party Size</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {partySize + invitedMembers.length} of 4 players
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <Input
                     id="party-size"
                     type="number"
                     min="1"
-                    max="4"
+                    max={4 - invitedMembers.length}
                     value={partySize}
-                    onChange={(e) => setPartySize(parseInt(e.target.value) || 1)}
-                    className="max-w-24"
-                    data-testid="input-party-size"
+                    onChange={(e) => setPartySize(Math.min(4 - invitedMembers.length, parseInt(e.target.value) || 1))}
+                    className="w-20"
                   />
                   <span className="text-sm text-muted-foreground">players</span>
                 </div>
@@ -118,7 +246,9 @@ export default function BookingPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Date & Time</span>
                   {selectedSlot ? (
-                    <Badge variant="outline">{selectedSlot.time}</Badge>
+                    <Badge variant="outline">
+                      {selectedSlot.date.toLocaleDateString()} at {selectedSlot.time}
+                    </Badge>
                   ) : (
                     <span className="text-muted-foreground">Not selected</span>
                   )}
@@ -126,38 +256,163 @@ export default function BookingPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Caddie</span>
                   {selectedCaddie ? (
-                    <Badge variant="outline">Assigned</Badge>
+                    <Badge variant="outline">Selected</Badge>
                   ) : (
                     <span className="text-muted-foreground">Not selected</span>
                   )}
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Party Size</span>
-                  <span className="font-medium">{partySize}</span>
                 </div>
               </div>
 
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium">Total</span>
-                  <span className="text-2xl font-bold text-primary">$45.00</span>
+                  <span className="text-2xl font-bold text-primary">
+                    ${(45 * (partySize + invitedMembers.length)).toFixed(2)}
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground">Per person tee time fee</p>
+                <p className="text-xs text-muted-foreground">${45} per player</p>
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button
-                className="w-full"
+
+              <div className="pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Invite Members</h3>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1 text-xs"
+                    onClick={() => setShowMemberSearch(true)}
+                    disabled={invitedMembers.length >= 3 || partySize + invitedMembers.length >= 4}
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    <span>Invite {invitedMembers.length > 0 ? 'More' : ''}</span>
+                  </Button>
+                </div>
+
+                {invitedMembers.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {invitedMembers.map(member => (
+                      <div key={member.id} className="flex items-center justify-between p-2 border rounded-md">
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={`/avatars/avatar-${member.id.slice(-1)}.jpg`} />
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">{member.email}</p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => removeInvitedMember(member.id)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          <span className="sr-only">Remove</span>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button 
+                className="w-full mt-4" 
+                size="lg"
                 onClick={handleBooking}
                 disabled={!selectedSlot || !selectedCaddie}
-                data-testid="button-confirm-booking"
               >
-                Confirm Booking
+                {invitedMembers.length > 0 ? 'Confirm Booking & Send Invites' : 'Confirm Booking'}
+              </Button>
+
+              {partySize + invitedMembers.length >= 4 && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Maximum of 4 players per booking
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Member Search Dialog */}
+      {showMemberSearch && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Invite Club Members</CardTitle>
+              <CardDescription>Search and select members to invite</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search members..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              
+              <ScrollArea className="h-64 rounded-md border">
+                {filteredMembers.length > 0 ? (
+                  <div className="divide-y">
+                    {filteredMembers.map((member) => (
+                      <div 
+                        key={member.id}
+                        className="flex items-center justify-between p-3 hover:bg-muted/50 cursor-pointer"
+                        onClick={() => handleInviteMember(member)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Avatar>
+                            <AvatarImage src={member.avatar} />
+                            <AvatarFallback>
+                              {member.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">{member.email}</p>
+                          </div>
+                        </div>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 w-8 p-0"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span className="sr-only">Invite</span>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-muted-foreground">
+                    <p>No members found</p>
+                    <p className="text-xs mt-1">Try a different search term</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowMemberSearch(false);
+                  setSearchTerm('');
+                }}
+              >
+                Done
               </Button>
             </CardFooter>
           </Card>
         </div>
-      </div>
+      )}
     </div>
   );
 }

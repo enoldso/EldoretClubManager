@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { Calendar, User, Bell, Clock, MapPin, Users, CreditCard, Star, X, RefreshCw, Plus } from 'lucide-react';
+import { Calendar, User, Bell, Clock, MapPin, Users, CreditCard, Star, X, RefreshCw, Plus, ClipboardCheck } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -196,6 +196,12 @@ const MemberDashboard: React.FC = () => {
   const quickActions = [
     { 
       id: 1, 
+      title: 'Tee Time Scoring', 
+      icon: <ClipboardCheck size={20} />,
+      onClick: () => navigate('/tee-time-scoring')
+    },
+    { 
+      id: 2, 
       title: 'Book Tee Time', 
       icon: <Calendar size={20} />, 
       onClick: () => navigate('/book-tee-time') 

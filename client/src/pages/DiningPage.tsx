@@ -4,8 +4,68 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, Minus, Clock, MapPin, Utensils, ShoppingCart, Calendar as CalendarIcon, Phone } from "lucide-react";
+import { Plus, Minus, Clock, MapPin, Utensils, ShoppingCart, Calendar as CalendarIcon, Phone, CalendarDays, UtensilsCrossed, Coffee, Wine, Salad } from "lucide-react";
 import { Label } from "@/components/ui/label";
+
+// Weekly menu specials
+const weeklyMenu = {
+  monday: {
+    day: 'Monday',
+    special: 'Meatless Monday',
+    items: [
+      { name: 'Mushroom Risotto', description: 'Creamy arborio rice with wild mushrooms and parmesan', price: 1600, isVeg: true },
+      { name: 'Greek Salad', description: 'Fresh vegetables, feta, olives, and olive oil', price: 1200, isVeg: true }
+    ]
+  },
+  tuesday: {
+    day: 'Tuesday',
+    special: 'Taco Tuesday',
+    items: [
+      { name: 'Beef Tacos', description: 'Three soft corn tortillas with seasoned beef, salsa, and guacamole', price: 1500, isVeg: false },
+      { name: 'Veggie Fajitas', description: 'Grilled vegetables with warm tortillas and all the fixings', price: 1400, isVeg: true }
+    ]
+  },
+  wednesday: {
+    day: 'Wednesday',
+    special: 'Wine & Dine',
+    items: [
+      { name: 'Wine Pairing Menu', description: 'Three-course meal with selected wine pairings', price: 3500, isVeg: false },
+      { name: 'Cheese Platter', description: 'Selection of artisanal cheeses with fruits and nuts', price: 1800, isVeg: true }
+    ]
+  },
+  thursday: {
+    day: 'Thursday',
+    special: 'Chef\'s Special',
+    items: [
+      { name: 'Grilled Ribeye', description: '12oz prime ribeye with roasted vegetables and red wine reduction', price: 2800, isVeg: false },
+      { name: 'Butternut Squash Soup', description: 'Creamy soup with toasted pumpkin seeds', price: 900, isVeg: true }
+    ]
+  },
+  friday: {
+    day: 'Friday',
+    special: 'Seafood Friday',
+    items: [
+      { name: 'Seafood Platter', description: 'Grilled fish, shrimp, and calamari with lemon butter sauce', price: 3200, isVeg: false },
+      { name: 'Fish & Chips', description: 'Beer-battered cod with hand-cut fries and tartar sauce', price: 1900, isVeg: false }
+    ]
+  },
+  saturday: {
+    day: 'Saturday',
+    special: 'Weekend Brunch',
+    items: [
+      { name: 'Eggs Benedict', description: 'Poached eggs on English muffins with hollandaise sauce', price: 1600, isVeg: false },
+      { name: 'Pancake Stack', description: 'Fluffy buttermilk pancakes with maple syrup and berries', price: 1300, isVeg: true }
+    ]
+  },
+  sunday: {
+    day: 'Sunday',
+    special: 'Sunday Roast',
+    items: [
+      { name: 'Roast Beef Dinner', description: 'Slow-roasted beef with Yorkshire pudding and all the trimmings', price: 2500, isVeg: false },
+      { name: 'Nut Roast', description: 'Seasonal vegetable and nut roast with vegetarian gravy', price: 1800, isVeg: true }
+    ]
+  }
+};
 
 // Sample menu items
 const menuItems = [
@@ -22,7 +82,7 @@ const categories = [...new Set(menuItems.map(item => item.category))];
 const DiningPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dine-in');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [cart, setCart] = useState<{id: number, quantity: number}[]>([]);
+  const [cart, setCart] = useState<Array<{id: number | string, quantity: number, name: string, price: number, isSpecial?: boolean}>>([]);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
@@ -34,52 +94,53 @@ const DiningPage: React.FC = () => {
     ? menuItems 
     : menuItems.filter(item => item.category === selectedCategory);
 
-  const addToCart = (itemId: number) => {
+  const addToCart = (item: { id: number | string, name: string, price: number, isSpecial?: boolean }) => {
     setCart(prev => {
-      const existingItem = prev.find(item => item.id === itemId);
+      const existingItem = prev.find(cartItem => cartItem.id === item.id && cartItem.isSpecial === item.isSpecial);
       if (existingItem) {
-        return prev.map(item => 
-          item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
+        return prev.map(cartItem => 
+          cartItem.id === item.id && cartItem.isSpecial === item.isSpecial 
+            ? { ...cartItem, quantity: cartItem.quantity + 1 } 
+            : cartItem
         );
       }
-      return [...prev, { id: itemId, quantity: 1 }];
+      return [...prev, { ...item, quantity: 1 }];
     });
   };
 
-  const removeFromCart = (itemId: number) => {
+  const removeFromCart = (itemId: number | string, isSpecial: boolean = false) => {
     setCart(prev => {
-      const existingItem = prev.find(item => item.id === itemId);
+      const existingItem = prev.find(item => item.id === itemId && item.isSpecial === isSpecial);
       if (existingItem && existingItem.quantity > 1) {
         return prev.map(item => 
-          item.id === itemId ? { ...item, quantity: item.quantity - 1 } : item
+          item.id === itemId && item.isSpecial === isSpecial 
+            ? { ...item, quantity: item.quantity - 1 } 
+            : item
         );
       }
-      return prev.filter(item => item.id !== itemId);
+      return prev.filter(item => !(item.id === itemId && item.isSpecial === isSpecial));
     });
   };
 
-  const getCartItem = (itemId: number) => {
-    return cart.find(item => item.id === itemId)?.quantity || 0;
+  const getCartItem = (itemId: number | string, isSpecial: boolean = false) => {
+    return cart.find(item => item.id === itemId && item.isSpecial === isSpecial)?.quantity || 0;
   };
 
   const cartTotal = cart.reduce((total, cartItem) => {
-    const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
-    return total + (item ? item.price * cartItem.quantity : 0);
+    return total + (cartItem.price * cartItem.quantity);
   }, 0);
 
   const handlePlaceOrder = () => {
     const orderDetails = {
       type: activeTab,
-      items: cart.map(cartItem => {
-        const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
-        return {
-          id: cartItem.id,
-          name: item?.name,
-          quantity: cartItem.quantity,
-          price: item?.price,
-          total: item ? item.price * cartItem.quantity : 0
-        };
-      }),
+      items: cart.map(cartItem => ({
+        id: cartItem.id,
+        name: cartItem.name,
+        quantity: cartItem.quantity,
+        price: cartItem.price,
+        total: cartItem.price * cartItem.quantity,
+        isSpecial: cartItem.isSpecial || false
+      })),
       total: cartTotal,
       deliveryAddress: activeTab === 'delivery' ? deliveryAddress : null,
       tableNumber: activeTab === 'dine-in' ? tableNumber : null,
@@ -97,6 +158,10 @@ const DiningPage: React.FC = () => {
     setCart([]);
   };
 
+  // Get today's special based on the current day
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const todaySpecial = weeklyMenu[today as keyof typeof weeklyMenu];
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -107,23 +172,29 @@ const DiningPage: React.FC = () => {
               ? 'Get your favorite meals delivered to your location' 
               : activeTab === 'dine-in' 
                 ? 'Order food to be served at your table' 
-                : 'Reserve a table for an exquisite dining experience'}
+                : activeTab === 'reservation' 
+                  ? 'Reserve a table for an exquisite dining experience'
+                  : 'Explore our weekly menu specials'}
           </p>
         </div>
         <div className="mt-4 md:mt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full md:grid-cols-4 grid-cols-2 mb-8 gap-2">
+              <TabsTrigger value="menu" className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                Weekly Menu
+              </TabsTrigger>
               <TabsTrigger value="dine-in" className="flex items-center gap-2">
                 <Utensils className="h-4 w-4" />
-                <span className="hidden sm:inline">Dine-in</span>
+                Dine In
               </TabsTrigger>
               <TabsTrigger value="delivery" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span className="hidden sm:inline">Delivery</span>
+                <ShoppingCart className="h-4 w-4" />
+                Delivery
               </TabsTrigger>
               <TabsTrigger value="reservation" className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Reservation</span>
+                Make Reservation
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -132,70 +203,134 @@ const DiningPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Menu Section */}
-        <div className="lg:col-span-2">
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle>Our Menu</CardTitle>
-                  <CardDescription>Select from our delicious offerings</CardDescription>
+        {activeTab === 'menu' && (
+          <div className="lg:col-span-2">
+            <Card className="mb-6">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle>Today's Special</CardTitle>
+                    <CardDescription>{todaySpecial.day} - {todaySpecial.special}</CardDescription>
+                  </div>
                 </div>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All Categories</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredItems.map(item => (
-                  <div key={item.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
-                        <p className="mt-2 font-medium text-primary">KSh {item.price.toLocaleString()}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => removeFromCart(item.id)}
-                          disabled={!getCartItem(item.id)}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="w-6 text-center">{getCartItem(item.id)}</span>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => addToCart(item.id)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {todaySpecial.items.map((item, index) => (
+                    <div key={`${item.name}-${index}`} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
+                            {item.isVeg && (
+                              <span className="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full">VEG</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{item.description}</p>
+                          <p className="font-medium text-primary">KSh {item.price.toLocaleString()}</p>
+                        </div>
+                        <div className="flex items-center gap-2 ml-4">
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => removeFromCart(`special-${index}`, true)}
+                            disabled={!getCartItem(`special-${index}`, true)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="w-6 text-center">
+                            {getCartItem(`special-${index}`, true)}
+                          </span>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => addToCart({
+                              id: `special-${index}`,
+                              name: item.name,
+                              price: item.price,
+                              isSpecial: true
+                            })}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    {item.isVeg && (
-                      <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400 mt-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                        Vegetarian
-                      </span>
-                    )}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab !== 'menu' && (
+          <div className="lg:col-span-2">
+            <Card className="mb-6">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle>Our Menu</CardTitle>
+                    <CardDescription>Select from our delicious offerings</CardDescription>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Categories</SelectItem>
+                      {categories.map(category => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredItems.map(item => (
+                    <div key={item.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
+                          <p className="mt-2 font-medium text-primary">KSh {item.price.toLocaleString()}</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => removeFromCart(item.id)}
+                            disabled={!getCartItem(item.id)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="w-6 text-center">{getCartItem(item.id)}</span>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => addToCart(item.id)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      {item.isVeg && (
+                        <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400 mt-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                          Vegetarian
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Order Summary */}
         <div className="lg:sticky lg:top-6 lg:h-fit">
@@ -210,7 +345,9 @@ const DiningPage: React.FC = () => {
                   ? 'Delivery order' 
                   : activeTab === 'dine-in' 
                     ? 'Table service order' 
-                    : 'Table reservation'}
+                    : activeTab === 'reservation' 
+                      ? 'Table reservation'
+                      : 'No order summary'}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
@@ -338,7 +475,9 @@ const DiningPage: React.FC = () => {
                   ? 'Delivery time: 30-45 min' 
                   : activeTab === 'dine-in' 
                     ? 'Food will be served at your table' 
-                    : 'Reservation will be confirmed shortly'}
+                    : activeTab === 'reservation' 
+                      ? 'Reservation will be confirmed shortly'
+                      : ''}
               </div>
             </CardContent>
           </Card>

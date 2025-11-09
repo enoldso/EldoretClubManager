@@ -10,6 +10,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import LoginForm from "@/components/LoginForm";
 import MemberDashboard from "@/pages/MemberDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AddMemberPage from "@/pages/AddMemberPage";
 import BookingPage from "@/pages/BookingPage";
 import BookTeeTime from "@/pages/BookTeeTime";
 import DiningPage from "@/pages/DiningPage";
@@ -79,7 +80,8 @@ function Router({ userType }: { userType: "member" | "admin" }) {
       {userType === "admin" && (
         <>
           <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/members" component={MembersManagement} />
+          <Route path="/members/new" component={AddMemberPage} /> // Added route
+          <Route path="/members" component={MembersManagement} />
           <Route path="/admin/tee-times" component={TeeTimesManagement} />
           <Route path="/admin/tournaments" component={TournamentsManagement} />
           <Route path="/admin/dining" component={DiningManagement} />

@@ -1,7 +1,11 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, DollarSign, TrendingUp, Utensils, Trophy, Plus, Search, Filter, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Users, Calendar, DollarSign, TrendingUp, Utensils, Trophy, Plus, Search, Filter, MoreHorizontal, Eye, Pencil, Trash2, X } from "lucide-react";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -17,10 +21,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { format } from 'date-fns';
+
+// Define types first
+// Member type
+type Member = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  membershipType: 'Gold' | 'Silver' | 'Bronze';
+  joinDate: string;
+  status: 'Active' | 'Inactive' | 'Suspended';
+};
 
 type Booking = {
   id: string;
   member: string;
+  memberId: string;
   date: string;
   time: string;
   course: string;
@@ -32,6 +54,114 @@ type Booking = {
   specialRequests: string;
 };
 
+// Sample members data
+const sampleMembers: Member[] = [
+  {
+    id: 'M001',
+    name: 'Dr. James Mwangi',
+    email: 'james.mwangi@example.com',
+    phone: '+254712345678',
+    membershipType: 'Gold',
+    joinDate: '2023-01-15',
+    status: 'Active'
+  },
+  {
+    id: 'M002',
+    name: 'Sarah Wanjiku',
+    email: 'sarah.w@example.com',
+    phone: '+254723456789',
+    membershipType: 'Silver',
+    joinDate: '2023-03-22',
+    status: 'Active'
+  },
+  {
+    id: 'M003',
+    name: 'Michael Ochieng',
+    email: 'm.ochieng@example.com',
+    phone: '+254734567890',
+    membershipType: 'Bronze',
+    joinDate: '2023-05-10',
+    status: 'Inactive'
+  }
+];
+
+// Sample data for recent bookings
+const recentBookings: Booking[] = [
+  { 
+    id: 'BK-2025-1124', 
+    member: 'Dr. James Mwangi', 
+    date: '2025-03-15', 
+    time: '07:30', 
+    course: 'Championship', 
+    players: 4,
+    caddie: 'John Kipchoge', 
+    status: 'Confirmed',
+    amount: 12500,
+    payment: 'Paid',
+    specialRequests: 'Golf cart requested'
+  },
+  { 
+    id: 'BK-2025-1123', 
+    member: 'Sarah Wanjiku', 
+    date: '2025-03-15', 
+    time: '08:15', 
+    course: 'Executive', 
+    players: 2,
+    caddie: 'Peter Kimutai', 
+    status: 'Confirmed',
+    amount: 7800,
+    payment: 'Pending',
+    specialRequests: 'Left-handed clubs needed'
+  },
+  { 
+    id: 'BK-2025-1122', 
+    member: 'Michael Ochieng', 
+    date: '2025-03-15', 
+    time: '09:00', 
+    course: 'Championship', 
+    players: 1,
+    caddie: 'David Korir', 
+    status: 'Pending',
+    amount: 4200,
+    payment: 'Unpaid',
+    specialRequests: 'Early check-in at 8:30 AM'
+  },
+  { 
+    id: 'BK-2025-1121', 
+    member: 'Amina Hassan', 
+    date: '2025-03-15', 
+    time: '10:30', 
+    course: 'Executive', 
+    players: 3,
+    caddie: 'Grace Wambui', 
+    status: 'Confirmed',
+    amount: 10200,
+    payment: 'Paid',
+    specialRequests: 'Vegetarian lunch for 3'
+  }
+];
+
+// Toast notification function using react-toastify
+const showToast = (title: string, description: string, type: 'success' | 'error' | 'info' = 'success') => {
+  const content = (
+    <div>
+      <h3 className="font-bold">{title}</h3>
+      <p className="text-sm">{description}</p>
+    </div>
+  );
+  
+  switch (type) {
+    case 'error':
+      toast.error(content);
+      break;
+    case 'info':
+      toast.info(content);
+      break;
+    default:
+      toast.success(content);
+  }
+};
+
 type TableAction = {
   icon: 'view' | 'edit' | 'delete';
   label: string;
@@ -39,7 +169,213 @@ type TableAction = {
   variant?: 'ghost' | 'outline' | 'default' | 'secondary' | 'destructive';
 };
 
+// Define types for form data
+type BookingFormData = Omit<Booking, 'id'> & { id?: string };
+
+
+// Navigation context
+import { useNavigate } from 'react-router-dom';
+
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+  // State for bookings - initialize with empty array and update in useEffect
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  
+  // Initialize bookings after component mounts
+  useEffect(() => {
+    setBookings(recentBookings);
+  }, []);
+  
+  // State for dialogs
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isNewBookingDialogOpen, setIsNewBookingDialogOpen] = useState(false);
+  
+  // State for selected booking
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  
+  // State for form data
+  const [formData, setFormData] = useState<BookingFormData>({
+    member: '',
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '09:00',
+    course: 'Championship',
+    players: 1,
+    caddie: '',
+    status: 'Pending',
+    amount: 0,
+    payment: 'Unpaid',
+    specialRequests: ''
+  });
+  
+  // Handle input change for form
+  const handleInputChange = (field: keyof BookingFormData, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    } as BookingFormData));
+  };
+  
+  // Handle view booking
+  const handleViewBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsViewDialogOpen(true);
+  };
+  
+  // Handle edit booking
+  const handleEditBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setFormData(booking);
+    setIsEditDialogOpen(true);
+  };
+  
+  // Handle delete booking
+  const handleDeleteClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Confirm delete booking
+  const confirmDeleteBooking = () => {
+    if (!selectedBooking) return;
+    
+    const deletedId = selectedBooking.id;
+    setBookings(prev => prev.filter(b => b.id !== deletedId));
+    setIsDeleteDialogOpen(false);
+    setSelectedBooking(null);
+    
+    // Ensure toast is called after state updates
+    setTimeout(() => {
+      showToast('Booking Deleted', `Booking for ${selectedBooking?.member} has been deleted.`, 'error');
+    }, 0);
+  };
+  
+  // Handle save booking (both create and update)
+  const handleSaveBooking = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (formData.id) {
+      // Update existing booking
+      setBookings(prev => 
+        prev.map(b => b.id === formData.id ? formData as Booking : b)
+      );
+      showToast('Booking Saved', `Changes to ${formData.member}'s booking have been saved.`);
+    } else {
+      // Create new booking
+      const newBooking: Booking = {
+        ...formData,
+        id: `BK-${Date.now()}`,
+      };
+      setBookings(prev => [newBooking, ...prev]);
+      setTimeout(() => {
+        toast({
+          title: 'Booking Created',
+          description: `New booking ${newBooking.id} has been created.`
+        });
+      }, 0);
+    }
+    
+    // Reset form and close dialog
+    setFormData({
+      member: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      time: '09:00',
+      course: 'Championship',
+      players: 1,
+      caddie: '',
+      status: 'Pending',
+      amount: 0,
+      payment: 'Unpaid',
+      specialRequests: ''
+    });
+    
+    setIsEditDialogOpen(false);
+    setIsNewBookingDialogOpen(false);
+  };
+  
+  // Handle new booking click
+  const handleNewBookingClick = () => {
+    setFormData({
+      member: '',
+      memberId: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      time: '09:00',
+      course: 'Championship',
+      players: 1,
+      caddie: '',
+      status: 'Pending',
+      amount: 0,
+      payment: 'Unpaid',
+      specialRequests: ''
+    } as BookingFormData);
+    setIsNewBookingDialogOpen(true);
+  };
+
+  // Handle member selection change
+  const handleMemberChange = (memberId: string) => {
+    const selectedMember = sampleMembers.find(m => m.id === memberId);
+    if (selectedMember) {
+      setFormData(prev => ({
+        ...prev,
+        member: selectedMember.name,
+        memberId: selectedMember.id
+      } as BookingFormData));
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.member && formData.date && formData.time) {
+      const newBooking: Booking = {
+        ...formData,
+        id: `BK-${Date.now()}`,
+        status: 'Confirmed',
+        amount: formData.course === 'Championship' ? 3500 : 2500
+      };
+      
+      setBookings(prev => [newBooking, ...prev]);
+      setIsNewBookingDialogOpen(false);
+      
+      showToast('Booking Created', `New booking for ${formData.member} has been created.`);
+    }
+  };
+  
+  // Handle filter button click
+  const handleFilterClick = () => {
+    // For now, we'll just show a toast notification
+    // In a real app, this would open a filter dialog
+    toast({
+      title: 'Filter Clicked',
+      description: 'Filter functionality will be implemented here.'
+    });  
+  };
+
+  // Navigation handlers
+  const navigateToAddMember = () => {
+    navigate('/members/new');
+  };
+
+  // Quick action handlers
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'New Booking':
+        handleNewBookingClick();
+        break;
+      case 'Add Member':
+        navigateToAddMember();
+        break;
+      case 'Process Payment':
+        showToast('Payment Processing', 'Payment processing functionality will be implemented here.', 'info');
+        break;
+      case 'Manage Staff':
+        showToast('Staff Management', 'Staff management functionality will be implemented here.', 'info');
+        break;
+      default:
+        showToast(`${action} Clicked`, `The ${action} action was triggered.`, 'info');
+    }
+  };
   const stats = [
     {
       title: "Total Members",
@@ -242,18 +578,18 @@ export default function AdminDashboard() {
     {
       label: 'View',
       icon: Eye,
-      onClick: (row: Booking) => console.log('View:', row)
+      onClick: handleViewBooking
     },
     {
       label: 'Edit',
       icon: Pencil,
-      onClick: (row: Booking) => console.log('Edit:', row)
+      onClick: handleEditBooking
     },
     {
       label: 'Delete',
       icon: Trash2,
       variant: 'destructive' as const,
-      onClick: (row: Booking) => console.log('Delete:', row)
+      onClick: handleDeleteClick
     }
   ];
 
@@ -309,11 +645,11 @@ export default function AdminDashboard() {
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
               />
             </div>
-            <Button variant="outline" size="sm" className="h-10">
+            <Button variant="outline" size="sm" className="h-10" onClick={handleFilterClick}>
               <Filter className="mr-2 h-4 w-4" />
               Filter
             </Button>
-            <Button size="sm" className="h-10">
+            <Button size="sm" className="h-10" onClick={handleNewBookingClick}>
               <Plus className="mr-2 h-4 w-4" />
               New Booking
             </Button>
@@ -333,7 +669,7 @@ export default function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentBookings.map((booking) => (
+                {bookings.map((booking) => (
                   <TableRow key={booking.id}>
                     {columns.map((column) => (
                       <TableCell key={`${booking.id}-${column.accessorKey as string}`}>
@@ -383,19 +719,35 @@ export default function AdminDashboard() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col items-center justify-center gap-2"
+              onClick={() => handleQuickAction('New Booking')}
+            >
               <Calendar className="h-6 w-6" />
               <span>New Booking</span>
             </Button>
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col items-center justify-center gap-2"
+              onClick={() => handleQuickAction('Add Member')}
+            >
               <Users className="h-6 w-6" />
               <span>Add Member</span>
             </Button>
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col items-center justify-center gap-2"
+              onClick={() => handleQuickAction('Process Payment')}
+            >
               <DollarSign className="h-6 w-6" />
               <span>Process Payment</span>
             </Button>
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col items-center justify-center gap-2"
+              onClick={() => handleQuickAction('Manage Staff')}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
@@ -441,5 +793,277 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
+  );
+
+  // Helper function to format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  return (
+    <>
+      <div className="space-y-8 p-6">
+        {/* Existing JSX content */}
+        {mainContent}
+      </div>
+
+      {/* View Booking Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <div className="flex justify-between items-center">
+              <DialogTitle>Booking Details</DialogTitle>
+              <Button variant="ghost" size="icon" onClick={() => setIsViewDialogOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <DialogDescription>
+              View details for booking {selectedBooking?.id}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedBooking && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Member</p>
+                  <p>{selectedBooking.member}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Date & Time</p>
+                  <p>{selectedBooking.date} at {selectedBooking.time}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Course</p>
+                  <p>{selectedBooking.course}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Players</p>
+                  <p>{selectedBooking.players}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Caddie</p>
+                  <p>{selectedBooking.caddie || 'Not assigned'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <Badge variant={selectedBooking.status === 'Confirmed' ? 'default' : 'secondary'}>
+                    {selectedBooking.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Payment</p>
+                  <Badge variant={selectedBooking.payment === 'Paid' ? 'default' : 'destructive'}>
+                    {selectedBooking.payment}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Amount</p>
+                  <p>{formatCurrency(selectedBooking.amount)}</p>
+                </div>
+              </div>
+              {selectedBooking.specialRequests && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Special Requests</p>
+                  <p className="mt-1">{selectedBooking.specialRequests}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+            <Button onClick={() => {
+              if (selectedBooking) {
+                handleEditBooking(selectedBooking);
+                setIsViewDialogOpen(false);
+              }
+            }}>Edit Booking</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Booking Dialog */}
+      <Dialog open={isEditDialogOpen || isNewBookingDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsEditDialogOpen(false);
+          setIsNewBookingDialogOpen(false);
+        }
+      }}>
+        <DialogContent className="sm:max-w-[625px]">
+          <form onSubmit={handleSaveBooking}>
+            <DialogHeader>
+              <DialogTitle>{formData.id ? 'Edit Booking' : 'New Booking'}</DialogTitle>
+              <DialogDescription>
+                {formData.id ? 'Update the booking details below.' : 'Fill in the details to create a new booking.'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="member">Member Name</Label>
+                  <Input
+                    id="member"
+                    value={formData.member}
+                    onChange={(e) => handleInputChange('member', e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => handleInputChange('time', e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course">Course</Label>
+                  <Select
+                    value={formData.course}
+                    onValueChange={(value) => handleInputChange('course', value)}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Championship">Championship</SelectItem>
+                      <SelectItem value="Executive">Executive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="players">Players</Label>
+                  <Input
+                    id="players"
+                    type="number"
+                    min="1"
+                    max="4"
+                    value={formData.players}
+                    onChange={(e) => handleInputChange('players', parseInt(e.target.value))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="caddie">Caddie</Label>
+                  <Input
+                    id="caddie"
+                    value={formData.caddie}
+                    onChange={(e) => handleInputChange('caddie', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => handleInputChange('status', value)}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Confirmed">Confirmed</SelectItem>
+                      <SelectItem value="Cancelled">Cancelled</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="payment">Payment Status</Label>
+                  <Select
+                    value={formData.payment}
+                    onValueChange={(value) => handleInputChange('payment', value)}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select payment status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Unpaid">Unpaid</SelectItem>
+                      <SelectItem value="Refunded">Refunded</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount (KES)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min="0"
+                    value={formData.amount}
+                    onChange={(e) => handleInputChange('amount', parseFloat(e.target.value))}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="specialRequests">Special Requests</Label>
+                <Textarea
+                  id="specialRequests"
+                  value={formData.specialRequests}
+                  onChange={(e) => handleInputChange('specialRequests', e.target.value)}
+                  placeholder="Any special requests or notes..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setIsNewBookingDialogOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                {formData.id ? 'Update' : 'Create'} Booking
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete booking {selectedBooking?.id}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteBooking}>
+              Delete Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { Calendar, User, Bell, Clock, MapPin, Users, CreditCard, Star, X, RefreshCw, Plus, ClipboardCheck } from 'lucide-react';
+import { Calendar, User, Bell, Clock, MapPin, Users, CreditCard, Star, X, RefreshCw, Plus, ClipboardCheck, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
+import MemberChatbot from '@/components/MemberChatbot';
 import { toast } from 'react-hot-toast';
 
 type Booking = {
@@ -503,6 +504,9 @@ const MemberDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Add Chatbot */}
+      <MemberChatbot />
     </div>
   );
 };

@@ -7,22 +7,10 @@ import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Mail, Phone } from 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { format } from 'date-fns';
 
-// Using the same Member type as in AdminDashboard
 type Member = {
   id: string;
   name: string;
@@ -42,67 +30,21 @@ export default function MembersManagement() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  // Sample data - replace with API call in production
   const members: Member[] = [
     {
       id: 'M001',
-      name: 'Dr. James Mwangi',
-      email: 'james.mwangi@example.com',
-      phone: '+254 712 345 678',
-      joinDate: '2022-03-15',
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '+254712345678',
+      joinDate: '2023-01-15',
       membershipType: 'Gold',
       status: 'Active',
-      lastActivity: '2023-11-06',
-      totalBookings: 24,
-      totalSpent: 245000,
-    },
-    {
-      id: 'M002',
-      name: 'Sarah Wanjiku',
-      email: 'sarah.w@example.com',
-      phone: '+254 723 456 789',
-      joinDate: '2023-01-10',
-      membershipType: 'Silver',
-      status: 'Active',
-      lastActivity: '2023-11-05',
+      lastActivity: '2023-11-10',
       totalBookings: 12,
-      totalSpent: 125000,
+      totalSpent: 120000,
     },
-    {
-      id: 'M003',
-      name: 'Michael Ochieng',
-      email: 'm.ochieng@example.com',
-      phone: '+254 734 567 890',
-      joinDate: '2023-06-22',
-      membershipType: 'Bronze',
-      status: 'Active',
-      lastActivity: '2023-11-02',
-      totalBookings: 8,
-      totalSpent: 78000,
-    },
-    {
-      id: 'M004',
-      name: 'Amina Hassan',
-      email: 'a.hassan@example.com',
-      phone: '+254 745 678 901',
-      joinDate: '2023-09-05',
-      membershipType: 'Bronze',
-      status: 'Pending',
-      lastActivity: '2023-10-28',
-      totalBookings: 2,
-      totalSpent: 15000,
-    },
-    {
-      id: 'M005',
-      name: 'Robert Kamau',
-      email: 'r.kamau@example.com',
-      phone: '+254 756 789 012',
-      joinDate: '2022-11-18',
-      membershipType: 'Gold',
-      status: 'Inactive',
-      lastActivity: '2023-09-15',
-      totalBookings: 15,
-      totalSpent: 165000,
-    },
+    // Add more sample members as needed
   ];
 
   const filteredMembers = members.filter(member =>
@@ -118,7 +60,7 @@ export default function MembersManagement() {
 
   const confirmDeleteMember = () => {
     if (!selectedMember) return;
-
+    
     // In a real app, you would make an API call to delete the member
     toast.success(`Member ${selectedMember.name} has been deleted.`);
     setIsDeleteDialogOpen(false);
@@ -126,7 +68,7 @@ export default function MembersManagement() {
   };
 
   const handleEditMember = (memberId: string) => {
-    navigate(`/members/edit/${memberId}`);
+    navigate(`/admin/members/edit/${memberId}`);
   };
 
   const formatCurrency = (amount: number) => {
@@ -138,11 +80,7 @@ export default function MembersManagement() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return format(new Date(dateString), 'PP');
   };
 
   const getStatusBadge = (status: Member['status']) => {
@@ -161,7 +99,7 @@ export default function MembersManagement() {
     const typeMap = {
       Gold: { label: 'Gold', className: 'bg-amber-500 text-white' },
       Silver: { label: 'Silver', className: 'bg-gray-300 text-gray-800' },
-      Bronze: { label: 'Bronze', className: 'bg-blue-100 text-blue-800' },
+      Bronze: { label: 'Bronze', className: 'bg-yellow-700 text-white' },
     };
 
     const { label, className } = typeMap[type] || { label: type, className: 'bg-gray-100' };
@@ -175,14 +113,14 @@ export default function MembersManagement() {
           <h1 className="text-2xl font-bold">Members Management</h1>
           <p className="text-muted-foreground">Manage your club members and their details</p>
         </div>
-        <Button onClick={() => navigate('/members/new')}>
+        <Button onClick={() => navigate('/admin/members/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Member
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4">
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Members</CardTitle>
@@ -209,7 +147,7 @@ export default function MembersManagement() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Member ID</TableHead>
+                <TableHead className="w-[100px]">ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Membership</TableHead>
@@ -222,46 +160,38 @@ export default function MembersManagement() {
             <TableBody>
               {filteredMembers.map((member) => (
                 <TableRow key={member.id}>
-                  <TableCell>{member.id}</TableCell>
+                  <TableCell className="font-medium">{member.id}</TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <div className="h-8 w-8 rounded-full bg-gray-100" />
-                      <div>
-                        <p className="text-sm font-medium">{member.name}</p>
-                        <p className="text-xs text-muted-foreground">{member.email}</p>
-                      </div>
+                    <div className="font-medium">{member.name}</div>
+                    <div className="text-sm text-muted-foreground">{member.email}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      <span>{member.phone}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-gray-500" />
-                      <p className="text-sm">{member.email}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Phone className="h-4 w-4 text-gray-500" />
-                      <p className="text-sm">{member.phone}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getMembershipBadge(member.membershipType)}
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(member.status)}
-                  </TableCell>
+                  <TableCell>{getMembershipBadge(member.membershipType)}</TableCell>
+                  <TableCell>{getStatusBadge(member.status)}</TableCell>
                   <TableCell>{formatDate(member.lastActivity)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(member.totalSpent)}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell>
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
+                      <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleEditMember(member.id)}>
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteMember(member)}>
-                          <Trash2 className="h-4 w-4 mr-2 text-red-500" />
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteMember(member)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

@@ -8,24 +8,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+export type MembershipType = 'Outskirt' | 'Absentee' | 'Full' | 'Junior';
+
 type Member = {
   id: string;
   name: string;
   email: string;
   phone: string;
-  membershipType: 'Gold' | 'Silver' | 'Bronze';
+  membershipType: MembershipType;
   joinDate: string;
   status: 'Active' | 'Inactive' | 'Suspended';
+  dateOfBirth?: string; // For age verification of Junior members
+  upgradeRequested?: boolean;
 };
 
 export default function AddMemberPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<Omit<Member, 'id' | 'joinDate'>>({ 
+  const [formData, setFormData] = useState<Omit<Member, 'id' | 'joinDate' | 'upgradeRequested'>>({ 
     name: '',
     email: '',
     phone: '',
-    membershipType: 'Bronze',
-    status: 'Active'
+    membershipType: 'Full',
+    status: 'Active',
+    dateOfBirth: ''
   });
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -115,34 +120,54 @@ export default function AddMemberPage() {
                   <Label htmlFor="membershipType">Membership Type</Label>
                   <Select
                     value={formData.membershipType}
-                    onValueChange={(value) => handleInputChange('membershipType', value as any)}
+                    onValueChange={(value) => handleInputChange('membershipType', value as MembershipType)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select membership type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Gold">Gold</SelectItem>
-                      <SelectItem value="Silver">Silver</SelectItem>
-                      <SelectItem value="Bronze">Bronze</SelectItem>
+                      <SelectItem value="Full">Full Member</SelectItem>
+                      <SelectItem value="Outskirt">Outskirt Member</SelectItem>
+                      <SelectItem value="Absentee">Absentee Member (Pay Only)</SelectItem>
+                      <SelectItem value="Junior">Junior Member (Under 25)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleInputChange('status', value as any)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Inactive">Inactive</SelectItem>
-                      <SelectItem value="Suspended">Suspended</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid gap-4">
+                  {formData.membershipType === 'Junior' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Date of Birth (Required for Junior Members)</Label>
+                      <Input
+                        id="dateOfBirth"
+                        type="date"
+                        required={formData.membershipType === 'Junior'}
+                        value={formData.dateOfBirth || ''}
+                        onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                      />
+                      {formData.membershipType === 'Junior' && formData.dateOfBirth && (
+                        <p className="text-sm text-muted-foreground">
+                          Age: {new Date().getFullYear() - new Date(formData.dateOfBirth).getFullYear()} years
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => handleInputChange('status', value as Member['status'])}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Inactive">Inactive</SelectItem>
+                        <SelectItem value="Suspended">Suspended</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               

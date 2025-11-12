@@ -1,8 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from 'react-hot-toast';
+import { Loader2 } from "lucide-react";
+
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  image: string;
+  price?: number;
+  hasPaidOption: boolean;
+}
 
 const EventsPage: React.FC = () => {
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isRSVPDialogOpen, setIsRSVPDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'paid' | 'unpaid'>('unpaid');
+  const [rsvpStatus, setRsvpStatus] = useState<Record<number, { status: 'going' | 'not_going' | 'pending'; paid: boolean }>>({});
   // Sample events data - in a real app, this would come from an API
-  const upcomingEvents = [
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([
     {
       id: 1,
       title: 'Wine Tasting Night',
@@ -11,6 +34,8 @@ const EventsPage: React.FC = () => {
       location: 'Main Lounge',
       description: 'Join us for an evening of fine wines and gourmet pairings.',
       image: '/images/events/wine-tasting.jpg',
+      price: 2500,
+      hasPaidOption: true,
     },
     {
       id: 2,
@@ -20,6 +45,8 @@ const EventsPage: React.FC = () => {
       location: 'Garden Terrace',
       description: 'Smooth jazz performances by renowned artists in our beautiful garden setting.',
       image: '/images/events/jazz-night.jpg',
+      price: 1500,
+      hasPaidOption: true,
     },
     {
       id: 3,
@@ -29,8 +56,60 @@ const EventsPage: React.FC = () => {
       location: 'Main Restaurant',
       description: 'Exclusive multi-course dinner prepared by our executive chef.',
       image: '/images/events/chef-special.jpg',
+      price: 3500,
+      hasPaidOption: true,
     },
-  ];
+  ]);
+
+  const handleRSVP = (event: Event) => {
+    setSelectedEvent(event);
+    setIsRSVPDialogOpen(true);
+  };
+
+  const handleRSVPSubmit = async () => {
+    if (!selectedEvent) return;
+    
+    setIsLoading(true);
+    try {
+      // In a real app, this would be an API call to your backend
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      setRsvpStatus(prev => ({
+        ...prev,
+        [selectedEvent.id]: { 
+          status: 'going', 
+          paid: paymentMethod === 'paid' 
+        }
+      }));
+      
+      toast.success(`RSVP Successful! You have successfully RSVP'd for ${selectedEvent.title}. ${paymentMethod === 'paid' ? 'Payment received. Looking forward to seeing you!' : 'Please make payment at the venue.'}`);
+      
+      setIsRSVPDialogOpen(false);
+    } catch (error) {
+      toast.error("Failed to process your RSVP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleCancelRSVP = async (eventId: number) => {
+    try {
+      // In a real app, this would be an API call to cancel RSVP
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+      
+      setRsvpStatus(prev => ({
+        ...prev,
+        [eventId]: { 
+          status: 'not_going',
+          paid: false
+        }
+      }));
+      
+      toast.success("Your RSVP has been cancelled.");
+    } catch (error) {
+      toast.error("Failed to cancel RSVP. Please try again.");
+    }
+  };
 
   return (
     <div className="p-6">
@@ -67,9 +146,32 @@ const EventsPage: React.FC = () => {
                 <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
                   Learn More
                 </button>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium">
-                  RSVP
-                </button>
+                {rsvpStatus[event.id]?.status === 'going' ? (
+                  <div className="flex space-x-2">
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                      {rsvpStatus[event.id]?.paid ? 'Paid' : 'Registered'}
+                    </span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelRSVP(event.id);
+                      }}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRSVP(event);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium"
+                  >
+                    RSVP
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -84,6 +186,72 @@ const EventsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* RSVP Dialog */}
+      <Dialog open={isRSVPDialogOpen} onOpenChange={setIsRSVPDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>RSVP for {selectedEvent?.title}</DialogTitle>
+            <DialogDescription>
+              {selectedEvent?.hasPaidOption 
+                ? "Please select your payment option:" 
+                : "Please confirm your attendance:"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedEvent?.hasPaidOption && (
+            <div className="grid gap-4 py-4">
+              <RadioGroup 
+                value={paymentMethod} 
+                onValueChange={(value: 'paid' | 'unpaid') => setPaymentMethod(value)}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="paid" id="paid" />
+                  <Label htmlFor="paid" className="flex-1">
+                    <div>Pay Now (KSh {selectedEvent?.price?.toLocaleString()})</div>
+                    <p className="text-sm text-muted-foreground">
+                      Secure payment via M-Pesa
+                    </p>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="unpaid" id="unpaid" />
+                  <Label htmlFor="unpaid" className="flex-1">
+                    <div>Pay at Venue</div>
+                    <p className="text-sm text-muted-foreground">
+                      Pay when you arrive at the event
+                    </p>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsRSVPDialogOpen(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleRSVPSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Confirm RSVP"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

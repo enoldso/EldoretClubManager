@@ -7,8 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Plus, Minus, Clock, MapPin, Utensils, ShoppingCart, Calendar as CalendarIcon, Phone, CalendarDays, UtensilsCrossed, Coffee, Wine, Salad } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
+// Menu items type
+type MenuItem = {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  isVeg: boolean;
+  isAvailable?: boolean;
+};
+
 // Sample menu items for the regular menu
-const menuItems = [
+const menuItems: MenuItem[] = [
   { 
     id: 1, 
     name: 'Grilled Salmon', 
@@ -326,22 +337,16 @@ const monthlyMenu = {
   }
 };
 
-// Sample menu items
-const menuItems = [
-  { id: 1, name: 'Grilled Salmon', category: 'Main Course', price: 1800, description: 'Fresh Atlantic salmon with lemon butter sauce', isVeg: false },
-  { id: 2, name: 'Club Sandwich', category: 'Lunch', price: 1200, description: 'Triple-decker sandwich with turkey, bacon, and avocado', isVeg: false },
-  { id: 3, name: 'Caesar Salad', category: 'Starter', price: 950, description: 'Crisp romaine with Caesar dressing and croutons', isVeg: true },
-  { id: 4, name: 'Beef Burger', category: 'Main Course', price: 1500, description: 'Juicy beef patty with cheese and special sauce', isVeg: false },
-  { id: 5, name: 'Margherita Pizza', category: 'Main Course', price: 1600, description: 'Classic pizza with tomato, mozzarella, and basil', isVeg: true },
-  { id: 6, name: 'Chocolate Lava Cake', category: 'Dessert', price: 800, description: 'Warm chocolate cake with a molten center', isVeg: true },
-];
-
 const categories = [...new Set(menuItems.map(item => item.category))];
+
 
 const DiningPage: React.FC = () => {
   // Navigation and menu state
-  const [activeTab, setActiveTab] = useState('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'reservation' | 'delivery'>('menu');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [activeWeek, setActiveWeek] = useState<string>('week1');
+  const [activeDay, setActiveDay] = useState<string>('monday');
+  const [diningOption, setDiningOption] = useState<'sitting-in' | 'takeaway' | 'home-delivery'>('sitting-in');
   
   // Cart state
   const [cart, setCart] = useState<Array<{
@@ -351,10 +356,6 @@ const DiningPage: React.FC = () => {
     price: number, 
     isSpecial?: boolean
   }>>([]);
-  
-  // Menu navigation
-  const [activeWeek, setActiveWeek] = useState<string>('week1');
-  const [activeDay, setActiveDay] = useState<string>('monday');
   
   // Delivery state
   const [deliveryOption, setDeliveryOption] = useState<string>('standard');
@@ -370,7 +371,8 @@ const DiningPage: React.FC = () => {
   
   // UI state
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const [orderType, setOrderType] = useState<'dine-in' | 'delivery' | 'takeaway'>('dine-in');
+  const [specialInstructions, setSpecialInstructions] = useState<string>('');
+  const [tableNumber, setTableNumber] = useState<string>('');
 
   const handlePartySizeChange = (increment: boolean) => {
     setPartySize(prev => {
@@ -419,6 +421,14 @@ const DiningPage: React.FC = () => {
     return cart.find(item => item.id === itemId && item.isSpecial === isSpecial)?.quantity || 0;
   };
 
+  // Get current date in YYYY-MM-DD format for date input
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Set default reservation date to today if not set
+  if (!reservationDate) {
+    setReservationDate(today);
+  }
+
   // Calculate cart total
   const cartTotal = cart.reduce((total, cartItem) => {
     const item = menuItems.find(item => item.id === cartItem.id);
@@ -435,10 +445,21 @@ const DiningPage: React.FC = () => {
 
   const handleSubmitOrder = async () => {
     try {
+      if (cart.length === 0) {
+        alert('Your cart is empty. Please add items before placing an order.');
+        return;
+      }
+
       const order = {
-        type: activeTab,
+        type: diningOption === 'home-delivery' ? 'delivery' : 'dine-in',
+        diningOption,
         items: cart.map(cartItem => {
-          const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
+          const item = menuItems.find(menuItem => menuItem.id === cartItem.id) || 
+                     Object.values(monthlyMenu).flatMap(week => 
+                       Object.values(week.days).flatMap(day => 
+                         day.items.find(i => i.id === cartItem.id)
+                       )
+                     ).find(Boolean);
           return {
             itemId: cartItem.id,
             name: item?.name || 'Unknown Item',
@@ -449,23 +470,30 @@ const DiningPage: React.FC = () => {
           };
         }),
         total: cartTotal,
-        partySize: activeTab === 'delivery' ? 1 : partySize,
-        deliveryAddress: activeTab === 'delivery' ? deliveryAddress : undefined,
-        tableNumber: activeTab === 'dine-in' ? tableNumber : undefined,
-        reservationTime: activeTab === 'reservation' ? `${reservationDate} ${reservationTime}` : undefined,
-        specialRequests
+        partySize: diningOption === 'home-delivery' ? 1 : partySize,
+        deliveryAddress: diningOption === 'home-delivery' ? deliveryAddress : undefined,
+        tableNumber: diningOption === 'sitting-in' ? tableNumber : undefined,
+        specialInstructions,
+        orderTime: new Date().toISOString(),
+        status: 'pending'
       };
 
       console.log('Submitting order:', order);
+      
+      // Here you would typically make an API call to submit the order
+      // For now, we'll just show a success message
+      alert('Your order has been placed successfully!');
+      
+      // Reset form after submission
+      setCart([]);
+      setSpecialRequests('');
+      setSpecialInstructions('');
+      setDeliveryAddress('');
+      setTableNumber('');
       setShowConfirmation(true);
       
-      // Reset form after a delay
+      // Hide confirmation after 3 seconds
       setTimeout(() => {
-        setCart([]);
-        setSpecialRequests('');
-        setSpecialInstructions('');
-        setDeliveryAddress('');
-        setTableNumber('');
         setShowConfirmation(false);
       }, 3000);
     } catch (error) {
@@ -506,6 +534,18 @@ const DiningPage: React.FC = () => {
     }
   };
 
+  // Get current day name
+  const getDayName = (date: Date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  };
+
+  // Set active day to current day if not set
+  React.useEffect(() => {
+    const today = new Date();
+    const currentDay = getDayName(today);
+    setActiveDay(currentDay);
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
@@ -514,12 +554,94 @@ const DiningPage: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-300 mt-1">
             {activeTab === 'delivery' 
               ? 'Get your favorite meals delivered to your location' 
-              : activeTab === 'dine-in' 
-                ? 'Order food to be served at your table'
-                : activeTab === 'reservation'
-                  ? 'Reserve a table for an exquisite dining experience'
-                  : 'Explore our weekly menu specials'}
+              : activeTab === 'reservation' 
+                ? 'Reserve a table for an exquisite dining experience'
+                : 'Explore our menu and place your order'}
           </p>
+          
+          {/* Dining Options Tabs */}
+          <div className="mt-6 mb-8">
+            <div className="flex flex-wrap gap-2 md:gap-4">
+              <button
+                onClick={() => setActiveTab('menu')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'menu' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Utensils size={18} />
+                  <span>Menu</span>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('reservation')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'reservation' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarDays size={18} />
+                  <span>Make a Reservation</span>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('delivery')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'delivery' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} />
+                  <span>Home Delivery</span>
+                </div>
+              </button>
+            </div>
+            
+            {/* Dining Type Selector - Only show when on menu tab */}
+            {activeTab === 'menu' && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dining Option</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setDiningOption('sitting-in')}
+                    className={`px-4 py-2 text-sm rounded-lg font-medium transition-colors ${
+                      diningOption === 'sitting-in'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Utensils size={16} />
+                      <span>Sitting In</span>
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={() => setDiningOption('takeaway')}
+                    className={`px-4 py-2 text-sm rounded-lg font-medium transition-colors ${
+                      diningOption === 'takeaway'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart size={16} />
+                      <span>Takeaway</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -538,24 +660,60 @@ const DiningPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {currentWeekMenu.days[activeDay as keyof typeof currentWeekMenu.days].items.map((item, index) => (
-                    <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium">{item.name}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{item.description}</p>
+                  {currentWeekMenu.days[activeDay as keyof typeof currentWeekMenu.days].items.map((item, index) => {
+                    const cartQuantity = getCartItem(item.id, true);
+                    return (
+                      <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-medium">{item.name}</h3>
+                            <p className="text-sm text-gray-500 mt-1">{item.description}</p>
+                            <div className="flex items-center mt-2">
+                              <span className="font-medium text-primary">KSh {item.price.toLocaleString()}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end ml-4">
+                            {cartQuantity > 0 ? (
+                              <div className="flex items-center space-x-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => removeFromCart(item.id, true)}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="w-6 text-center">{cartQuantity}</span>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => addToCart({ ...item, isSpecial: true })}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button 
+                                size="sm" 
+                                onClick={() => addToCart({ ...item, isSpecial: true })}
+                                className="whitespace-nowrap"
+                              >
+                                Add to Cart
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        <span className="font-medium">KSh {item.price.toLocaleString()}</span>
+                        {item.isChefSpecial && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Chef's Special
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      {item.isChefSpecial && (
-                        <div className="mt-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Chef's Special
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -648,62 +806,56 @@ const DiningPage: React.FC = () => {
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
                   />
+                  
+                  {/* Cart Items */}
+                  {cart.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <h4 className="font-medium">Your Order</h4>
+                      <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                        {cart.map(cartItem => {
+                          const item = menuItems.find(menuItem => menuItem.id === cartItem.id) || 
+                                     Object.values(monthlyMenu).flatMap(week => 
+                                       Object.values(week.days).flatMap(day => 
+                                         day.items.find(i => i.id === cartItem.id)
+                                       )
+                                     ).find(Boolean);
+                          if (!item) return null;
+                          return (
+                            <div key={`${cartItem.id}-${cartItem.isSpecial ? 'special' : 'regular'}`} 
+                                 className="flex justify-between items-center text-sm py-1">
+                              <div>
+                                <span className="font-medium">{cartItem.quantity}x</span> {item.name}
+                              </div>
+                              <div className="font-medium">
+                                KSh {(item.price * cartItem.quantity).toLocaleString()}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="border-t pt-2 mt-2 flex justify-between font-medium">
+                        <span>Total</span>
+                        <span>KSh {cartTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Submit Button */}
+                {/* Order Button */}
                 <Button 
-                  className="w-full mt-4"
+                  className="w-full mt-4" 
+                  size="lg"
                   onClick={handlePlaceOrder}
-                  disabled={cart.length === 0 && activeTab !== 'reservation'}
+                  disabled={activeTab === 'reservation' ? false : cart.length === 0}
                 >
-                  {activeTab === 'delivery' 
-                    ? 'Place Delivery Order' 
-                    : activeTab === 'dine-in' 
-                      ? 'Place Dine-in Order'
-                      : 'Make Reservation'}
+                  {activeTab === 'reservation' 
+                    ? 'Make Reservation' 
+                    : activeTab === 'delivery' 
+                      ? 'Place Delivery Order' 
+                      : activeTab === 'dine-in'
+                        ? 'Order Now'
+                        : 'Place Order'}
                 </Button>
-
-                {/* Cart Summary */}
-                {cart.length > 0 && (
-                  <div className="mt-6 border-t pt-4 space-y-3">
-                    <h4 className="font-medium">Your Order</h4>
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                      {cart.map(cartItem => {
-                        const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
-                        if (!item) return null;
-                        return (
-                          <div key={cartItem.id} className="flex justify-between items-center text-sm">
-                            <div>
-                              <span className="font-medium">{cartItem.quantity}x</span> {item.name}
-                            </div>
-                            <div className="font-medium">
-                              KSh {(item.price * cartItem.quantity).toLocaleString()}
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                  <div className="border-t pt-2 flex justify-between font-medium">
-                    <span>Total</span>
-                    <span>KSh {cartTotal.toLocaleString()}</span>
-                  </div>
-                </div>
-              )}
-
-              <Button 
-                className="w-full mt-4" 
-                size="lg"
-                onClick={handlePlaceOrder}
-                disabled={activeTab === 'reservation' ? false : cart.length === 0}
-              >
-                {activeTab === 'reservation' 
-                  ? 'Make Reservation' 
-                  : activeTab === 'delivery' 
-                    ? 'Place Delivery Order' 
-                    : activeTab === 'dine-in'
-                      ? 'Order Now'
-                      : 'Place Order'}
-              </Button>
 
               <div className="flex items-center text-xs text-muted-foreground mt-2">
                 <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
@@ -748,8 +900,7 @@ const DiningPage: React.FC = () => {
                 </div>
               </div>
             </CardContent>
-            </Card>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

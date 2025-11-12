@@ -7,63 +7,322 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Plus, Minus, Clock, MapPin, Utensils, ShoppingCart, Calendar as CalendarIcon, Phone, CalendarDays, UtensilsCrossed, Coffee, Wine, Salad } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
-// Weekly menu specials
-const weeklyMenu = {
-  monday: {
-    day: 'Monday',
-    special: 'Meatless Monday',
-    items: [
-      { name: 'Mushroom Risotto', description: 'Creamy arborio rice with wild mushrooms and parmesan', price: 1600, isVeg: true },
-      { name: 'Greek Salad', description: 'Fresh vegetables, feta, olives, and olive oil', price: 1200, isVeg: true }
-    ]
+// Sample menu items for the regular menu
+const menuItems = [
+  { 
+    id: 1, 
+    name: 'Grilled Salmon', 
+    category: 'Main Course', 
+    price: 2800, 
+    description: 'Fresh Atlantic salmon with lemon butter sauce and seasonal vegetables', 
+    isVeg: false,
+    isAvailable: true
   },
-  tuesday: {
-    day: 'Tuesday',
-    special: 'Taco Tuesday',
-    items: [
-      { name: 'Beef Tacos', description: 'Three soft corn tortillas with seasoned beef, salsa, and guacamole', price: 1500, isVeg: false },
-      { name: 'Veggie Fajitas', description: 'Grilled vegetables with warm tortillas and all the fixings', price: 1400, isVeg: true }
-    ]
+  { 
+    id: 2, 
+    name: 'Margherita Pizza', 
+    category: 'Main Course', 
+    price: 2200, 
+    description: 'Classic pizza with tomato sauce, mozzarella, and fresh basil', 
+    isVeg: true,
+    isAvailable: true
   },
-  wednesday: {
-    day: 'Wednesday',
-    special: 'Wine & Dine',
-    items: [
-      { name: 'Wine Pairing Menu', description: 'Three-course meal with selected wine pairings', price: 3500, isVeg: false },
-      { name: 'Cheese Platter', description: 'Selection of artisanal cheeses with fruits and nuts', price: 1800, isVeg: true }
-    ]
+  { 
+    id: 3, 
+    name: 'Caesar Salad', 
+    category: 'Starter', 
+    price: 1200, 
+    description: 'Crisp romaine with Caesar dressing, croutons, and parmesan', 
+    isVeg: true,
+    isAvailable: true
   },
-  thursday: {
-    day: 'Thursday',
-    special: 'Chef\'s Special',
-    items: [
-      { name: 'Grilled Ribeye', description: '12oz prime ribeye with roasted vegetables and red wine reduction', price: 2800, isVeg: false },
-      { name: 'Butternut Squash Soup', description: 'Creamy soup with toasted pumpkin seeds', price: 900, isVeg: true }
-    ]
+  { 
+    id: 4, 
+    name: 'Beef Burger', 
+    category: 'Main Course', 
+    price: 1900, 
+    description: 'Juicy beef patty with cheese, lettuce, and special sauce', 
+    isVeg: false,
+    isAvailable: true
   },
-  friday: {
-    day: 'Friday',
-    special: 'Seafood Friday',
-    items: [
-      { name: 'Seafood Platter', description: 'Grilled fish, shrimp, and calamari with lemon butter sauce', price: 3200, isVeg: false },
-      { name: 'Fish & Chips', description: 'Beer-battered cod with hand-cut fries and tartar sauce', price: 1900, isVeg: false }
-    ]
+  { 
+    id: 5, 
+    name: 'Chocolate Lava Cake', 
+    category: 'Dessert', 
+    price: 900, 
+    description: 'Warm chocolate cake with a molten center, served with vanilla ice cream', 
+    isVeg: true,
+    isAvailable: true
   },
-  saturday: {
-    day: 'Saturday',
-    special: 'Weekend Brunch',
-    items: [
-      { name: 'Eggs Benedict', description: 'Poached eggs on English muffins with hollandaise sauce', price: 1600, isVeg: false },
-      { name: 'Pancake Stack', description: 'Fluffy buttermilk pancakes with maple syrup and berries', price: 1300, isVeg: true }
-    ]
+  { 
+    id: 6, 
+    name: 'Mushroom Risotto', 
+    category: 'Main Course', 
+    price: 2100, 
+    description: 'Creamy arborio rice with wild mushrooms and parmesan', 
+    isVeg: true,
+    isAvailable: true
+  }
+];
+
+// Delivery options
+const deliveryOptions = [
+  { id: 'standard', name: 'Standard Delivery', price: 300, time: '45-60 min' },
+  { id: 'express', name: 'Express Delivery', price: 500, time: '25-35 min' }
+];
+
+// Table types for reservations
+const tableTypes = [
+  { id: 'standard', name: 'Standard Table', seats: 2, minSpend: 2000 },
+  { id: 'booth', name: 'Booth', seats: 4, minSpend: 4000 },
+  { id: 'private', name: 'Private Room', seats: 6, minSpend: 10000 }
+];
+
+// Monthly menu specials
+const monthlyMenu = {
+  week1: {
+    name: 'Week 1: Mediterranean Delights',
+    days: {
+      monday: {
+        day: 'Monday',
+        special: 'Mezze Monday',
+        items: [
+          { name: 'Hummus & Pita Platter', description: 'House-made hummus with warm pita and olives', price: 1200, isVeg: true, isChefSpecial: true },
+          { name: 'Falafel Wrap', description: 'Crispy falafel with tahini and fresh vegetables', price: 1400, isVeg: true }
+        ]
+      },
+      tuesday: {
+        day: 'Tuesday',
+        special: 'Tuscan Tuesday',
+        items: [
+          { name: 'Pasta Carbonara', description: 'Classic spaghetti with pancetta, eggs, and pecorino', price: 1800, isVeg: false, isChefSpecial: true },
+          { name: 'Bruschetta', description: 'Toasted bread with tomatoes, garlic, and basil', price: 1000, isVeg: true }
+        ]
+      },
+      wednesday: {
+        day: 'Wednesday',
+        special: 'Wine & Dine',
+        items: [
+          { name: 'Wine Pairing Menu', description: 'Three-course meal with selected wine pairings', price: 3500, isVeg: false, isChefSpecial: true },
+          { name: 'Cheese & Charcuterie Board', description: 'Selection of artisanal cheeses and cured meats', price: 2200, isVeg: false }
+        ]
+      },
+      thursday: {
+        day: 'Thursday',
+        special: 'Steak Night',
+        items: [
+          { name: 'Grilled Ribeye', description: '12oz prime ribeye with roasted vegetables and red wine reduction', price: 3200, isVeg: false, isChefSpecial: true },
+          { name: 'Mushroom Risotto', description: 'Creamy arborio rice with wild mushrooms', price: 1600, isVeg: true }
+        ]
+      },
+      friday: {
+        day: 'Friday',
+        special: 'Seafood Extravaganza',
+        items: [
+          { name: 'Seafood Paella', description: 'Spanish-style rice with mixed seafood and saffron', price: 2800, isVeg: false, isChefSpecial: true },
+          { name: 'Grilled Salmon', description: 'With lemon butter sauce and seasonal vegetables', price: 2400, isVeg: false }
+        ]
+      },
+      saturday: {
+        day: 'Saturday',
+        special: 'Chef\'s Tasting Menu',
+        items: [
+          { name: '5-Course Tasting Menu', description: 'Chef\'s selection of seasonal dishes', price: 4500, isVeg: false, isChefSpecial: true },
+          { name: 'Wine Pairing', description: 'Optional wine pairing with each course', price: 2000, isVeg: false }
+        ]
+      },
+      sunday: {
+        day: 'Sunday',
+        special: 'Sunday Roast',
+        items: [
+          { name: 'Beef Roast', description: 'Slow-roasted beef with Yorkshire pudding and vegetables', price: 2600, isVeg: false, isChefSpecial: true },
+          { name: 'Vegetable Wellington', description: 'Mushroom and spinach in puff pastry', price: 2000, isVeg: true }
+        ]
+      }
+    }
   },
-  sunday: {
-    day: 'Sunday',
-    special: 'Sunday Roast',
-    items: [
-      { name: 'Roast Beef Dinner', description: 'Slow-roasted beef with Yorkshire pudding and all the trimmings', price: 2500, isVeg: false },
-      { name: 'Nut Roast', description: 'Seasonal vegetable and nut roast with vegetarian gravy', price: 1800, isVeg: true }
-    ]
+  week2: {
+    name: 'Week 2: Asian Fusion',
+    days: {
+      monday: {
+        day: 'Monday',
+        special: 'Sushi Night',
+        items: [
+          { name: 'Sushi Platter', description: 'Assorted fresh sushi and sashimi', price: 2800, isVeg: false, isChefSpecial: true },
+          { name: 'Vegetable Tempura', description: 'Lightly battered seasonal vegetables', price: 1600, isVeg: true }
+        ]
+      },
+      tuesday: {
+        day: 'Tuesday',
+        special: 'Thai Tuesday',
+        items: [
+          { name: 'Pad Thai', description: 'Stir-fried rice noodles with shrimp and peanuts', price: 1800, isVeg: false, isChefSpecial: true },
+          { name: 'Green Curry', description: 'With your choice of chicken, beef, or tofu', price: 1700, isVeg: false }
+        ]
+      },
+      wednesday: {
+        day: 'Wednesday',
+        special: 'Dim Sum Day',
+        items: [
+          { name: 'Dim Sum Platter', description: 'Assorted steamed dumplings and buns', price: 2200, isVeg: false, isChefSpecial: true },
+          { name: 'Hot & Sour Soup', description: 'Spicy and tangy traditional soup', price: 900, isVeg: true }
+        ]
+      },
+      thursday: {
+        day: 'Thursday',
+        special: 'Korean BBQ',
+        items: [
+          { name: 'Bulgogi', description: 'Marinated beef with rice and banchan', price: 2600, isVeg: false, isChefSpecial: true },
+          { name: 'Bibimbap', description: 'Mixed rice with vegetables and egg', price: 1900, isVeg: false }
+        ]
+      },
+      friday: {
+        day: 'Friday',
+        special: 'Sichuan Night',
+        items: [
+          { name: 'Kung Pao Chicken', description: 'Spicy stir-fry with peanuts and vegetables', price: 2000, isVeg: false, isChefSpecial: true },
+          { name: 'Mapo Tofu', description: 'Spicy tofu with minced pork in chili sauce', price: 1700, isVeg: false }
+        ]
+      },
+      saturday: {
+        day: 'Saturday',
+        special: 'Sushi & Sake',
+        items: [
+          { name: 'Omakase Experience', description: 'Chef\'s choice sushi selection', price: 3800, isVeg: false, isChefSpecial: true },
+          { name: 'Sake Tasting', description: 'Selection of premium sakes', price: 2500, isVeg: true }
+        ]
+      },
+      sunday: {
+        day: 'Sunday',
+        special: 'Ramen Sunday',
+        items: [
+          { name: 'Tonkotsu Ramen', description: 'Rich pork broth with chashu and ramen eggs', price: 2000, isVeg: false, isChefSpecial: true },
+          { name: 'Vegetable Ramen', description: 'Miso broth with seasonal vegetables', price: 1800, isVeg: true }
+        ]
+      }
+    }
+  },
+  week3: {
+    name: 'Week 3: Italian Classics',
+    days: {
+      monday: {
+        day: 'Monday',
+        special: 'Pasta Night',
+        items: [
+          { name: 'Spaghetti Carbonara', description: 'Classic Roman pasta with egg and pancetta', price: 1900, isVeg: false, isChefSpecial: true },
+          { name: 'Penne Arrabbiata', description: 'Spicy tomato sauce with garlic and chili', price: 1600, isVeg: true }
+        ]
+      },
+      tuesday: {
+        day: 'Tuesday',
+        special: 'Pizza Night',
+        items: [
+          { name: 'Truffle Mushroom Pizza', description: 'White truffle oil, wild mushrooms, and mozzarella', price: 2200, isVeg: true, isChefSpecial: true },
+          { name: 'Pepperoni Pizza', description: 'Classic pepperoni with tomato sauce', price: 2000, isVeg: false }
+        ]
+      },
+      wednesday: {
+        day: 'Wednesday',
+        special: 'Risotto Day',
+        items: [
+          { name: 'Saffron Risotto', description: 'With seared scallops and lemon zest', price: 2500, isVeg: false, isChefSpecial: true },
+          { name: 'Mushroom Risotto', description: 'With wild mushrooms and parmesan', price: 1800, isVeg: true }
+        ]
+      },
+      thursday: {
+        day: 'Thursday',
+        special: 'Meatball Night',
+        items: [
+          { name: 'Grandma\'s Meatballs', description: 'Homestyle meatballs in tomato sauce with polenta', price: 2100, isVeg: false, isChefSpecial: true },
+          { name: 'Eggplant Parmesan', description: 'Breaded eggplant with marinara and mozzarella', price: 1900, isVeg: true }
+        ]
+      },
+      friday: {
+        day: 'Friday',
+        special: 'Seafood Pasta',
+        items: [
+          { name: 'Linguine alle Vongole', description: 'Clams in white wine and garlic sauce', price: 2600, isVeg: false, isChefSpecial: true },
+          { name: 'Shrimp Scampi', description: 'With linguine in garlic butter sauce', price: 2800, isVeg: false }
+        ]
+      },
+      saturday: {
+        day: 'Saturday',
+        special: 'Tuscan Feast',
+        items: [
+          { name: 'Bistecca alla Fiorentina', description: 'Grilled T-bone steak with rosemary potatoes', price: 3800, isVeg: false, isChefSpecial: true },
+          { name: 'Truffle Risotto', description: 'With wild mushrooms and parmesan', price: 2200, isVeg: true }
+        ]
+      },
+      sunday: {
+        day: 'Sunday',
+        special: 'Sunday Gravy',
+        items: [
+          { name: 'Sunday Gravy', description: 'Slow-cooked meat sauce with pasta', price: 2200, isVeg: false, isChefSpecial: true },
+          { name: 'Tiramisu', description: 'Classic Italian dessert', price: 900, isVeg: true }
+        ]
+      }
+    }
+  },
+  week4: {
+    name: 'Week 4: Global Cuisine',
+    days: {
+      monday: {
+        day: 'Monday',
+        special: 'Mexican Fiesta',
+        items: [
+          { name: 'Carne Asada Tacos', description: 'Grilled steak with fresh salsa and guacamole', price: 1900, isVeg: false, isChefSpecial: true },
+          { name: 'Vegetable Enchiladas', description: 'With tomatillo sauce and queso fresco', price: 1700, isVeg: true }
+        ]
+      },
+      tuesday: {
+        day: 'Tuesday',
+        special: 'Indian Spice',
+        items: [
+          { name: 'Butter Chicken', description: 'Tandoori chicken in tomato cream sauce', price: 2100, isVeg: false, isChefSpecial: true },
+          { name: 'Palak Paneer', description: 'Spinach and cheese in spiced curry', price: 1800, isVeg: true }
+        ]
+      },
+      wednesday: {
+        day: 'Wednesday',
+        special: 'Greek Night',
+        items: [
+          { name: 'Moussaka', description: 'Layered eggplant and spiced meat with béchamel', price: 2200, isVeg: false, isChefSpecial: true },
+          { name: 'Greek Salad', description: 'With feta, olives, and olive oil', price: 1500, isVeg: true }
+        ]
+      },
+      thursday: {
+        day: 'Thursday',
+        special: 'French Bistro',
+        items: [
+          { name: 'Coq au Vin', description: 'Chicken braised in red wine with mushrooms', price: 2800, isVeg: false, isChefSpecial: true },
+          { name: 'Ratatouille', description: 'Provençal vegetable stew', price: 1900, isVeg: true }
+        ]
+      },
+      friday: {
+        day: 'Friday',
+        special: 'Seafood Tower',
+        items: [
+          { name: 'Grand Seafood Tower', description: 'Oysters, shrimp, crab, and lobster with sauces', price: 4500, isVeg: false, isChefSpecial: true },
+          { name: 'Grilled Octopus', description: 'With lemon and herbs', price: 2600, isVeg: false }
+        ]
+      },
+      saturday: {
+        day: 'Saturday',
+        special: 'Chef\'s Tasting',
+        items: [
+          { name: '7-Course Tasting Menu', description: 'Chef\'s selection of global flavors', price: 5200, isVeg: false, isChefSpecial: true },
+          { name: 'Wine Pairing', description: 'Selected wines with each course', price: 2500, isVeg: false }
+        ]
+      },
+      sunday: {
+        day: 'Sunday',
+        special: 'BBQ Sunday',
+        items: [
+          { name: 'BBQ Platter', description: 'Ribs, brisket, and pulled pork with sides', price: 2800, isVeg: false, isChefSpecial: true },
+          { name: 'Vegetable Skewers', description: 'Grilled seasonal vegetables with chimichurri', price: 1800, isVeg: true }
+        ]
+      }
+    }
   }
 };
 
@@ -80,16 +339,50 @@ const menuItems = [
 const categories = [...new Set(menuItems.map(item => item.category))];
 
 const DiningPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('dine-in');
+  // Navigation and menu state
+  const [activeTab, setActiveTab] = useState('menu');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [cart, setCart] = useState<Array<{id: number | string, quantity: number, name: string, price: number, isSpecial?: boolean}>>([]);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [tableNumber, setTableNumber] = useState('');
-  const [specialInstructions, setSpecialInstructions] = useState('');
-  const [reservationDate, setReservationDate] = useState('');
-  const [reservationTime, setReservationTime] = useState('');
-  const [partySize, setPartySize] = useState(2);
+  
+  // Cart state
+  const [cart, setCart] = useState<Array<{
+    id: number | string, 
+    quantity: number, 
+    name: string, 
+    price: number, 
+    isSpecial?: boolean
+  }>>([]);
+  
+  // Menu navigation
+  const [activeWeek, setActiveWeek] = useState<string>('week1');
+  const [activeDay, setActiveDay] = useState<string>('monday');
+  
+  // Delivery state
+  const [deliveryOption, setDeliveryOption] = useState<string>('standard');
+  const [deliveryAddress, setDeliveryAddress] = useState<string>('');
+  const [deliveryInstructions, setDeliveryInstructions] = useState<string>('');
+  
+  // Reservation state
+  const [reservationDate, setReservationDate] = useState<string>('');
+  const [reservationTime, setReservationTime] = useState<string>('19:00');
+  const [partySize, setPartySize] = useState<number>(2);
+  const [tableType, setTableType] = useState<string>('standard');
+  const [specialRequests, setSpecialRequests] = useState<string>('');
+  
+  // UI state
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [orderType, setOrderType] = useState<'dine-in' | 'delivery' | 'takeaway'>('dine-in');
 
+  const handlePartySizeChange = (increment: boolean) => {
+    setPartySize(prev => {
+      const newSize = increment ? prev + 1 : prev - 1;
+      return Math.min(Math.max(newSize, 1), 10);
+    });
+  };
+
+  // Get current week's menu
+  const currentWeekMenu = monthlyMenu[activeWeek as keyof typeof monthlyMenu];
+  
+  // Filter menu items based on selected category
   const filteredItems = selectedCategory === 'All' 
     ? menuItems 
     : menuItems.filter(item => item.category === selectedCategory);
@@ -126,203 +419,140 @@ const DiningPage: React.FC = () => {
     return cart.find(item => item.id === itemId && item.isSpecial === isSpecial)?.quantity || 0;
   };
 
+  // Calculate cart total
   const cartTotal = cart.reduce((total, cartItem) => {
-    return total + (cartItem.price * cartItem.quantity);
+    const item = menuItems.find(item => item.id === cartItem.id);
+    return total + ((item?.price || 0) * cartItem.quantity);
   }, 0);
 
-  const handlePlaceOrder = () => {
-    const orderDetails = {
-      type: activeTab,
-      items: cart.map(cartItem => ({
-        id: cartItem.id,
-        name: cartItem.name,
-        quantity: cartItem.quantity,
-        price: cartItem.price,
-        total: cartItem.price * cartItem.quantity,
-        isSpecial: cartItem.isSpecial || false
-      })),
-      total: cartTotal,
-      deliveryAddress: activeTab === 'delivery' ? deliveryAddress : null,
-      tableNumber: activeTab === 'dine-in' ? tableNumber : null,
-      specialInstructions,
-      reservation: activeTab === 'reservation' ? {
-        date: reservationDate,
-        time: reservationTime,
-        partySize
-      } : null
-    };
-
-    console.log('Placing order:', orderDetails);
-    // In a real app, you would send this to your backend
-    alert('Order placed successfully!');
-    setCart([]);
+  const handlePlaceOrder = async () => {
+    if (activeTab === 'reservation') {
+      await handleMakeReservation();
+    } else {
+      await handleSubmitOrder();
+    }
   };
 
-  // Get today's special based on the current day
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaySpecial = weeklyMenu[today as keyof typeof weeklyMenu];
+  const handleSubmitOrder = async () => {
+    try {
+      const order = {
+        type: activeTab,
+        items: cart.map(cartItem => {
+          const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
+          return {
+            itemId: cartItem.id,
+            name: item?.name || 'Unknown Item',
+            quantity: cartItem.quantity,
+            price: item?.price || 0,
+            total: (item?.price || 0) * cartItem.quantity,
+            isSpecial: cartItem.isSpecial || false
+          };
+        }),
+        total: cartTotal,
+        partySize: activeTab === 'delivery' ? 1 : partySize,
+        deliveryAddress: activeTab === 'delivery' ? deliveryAddress : undefined,
+        tableNumber: activeTab === 'dine-in' ? tableNumber : undefined,
+        reservationTime: activeTab === 'reservation' ? `${reservationDate} ${reservationTime}` : undefined,
+        specialRequests
+      };
+
+      console.log('Submitting order:', order);
+      setShowConfirmation(true);
+      
+      // Reset form after a delay
+      setTimeout(() => {
+        setCart([]);
+        setSpecialRequests('');
+        setSpecialInstructions('');
+        setDeliveryAddress('');
+        setTableNumber('');
+        setShowConfirmation(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      alert('There was an error processing your order. Please try again.');
+    }
+  };
+
+  const handleMakeReservation = async () => {
+    try {
+      if (!reservationDate) {
+        alert('Please select a date for your reservation');
+        return;
+      }
+
+      const reservation = {
+        date: reservationDate,
+        time: reservationTime,
+        partySize,
+        specialRequests,
+        status: 'pending'
+      };
+
+      console.log('Making reservation:', reservation);
+      setShowConfirmation(true);
+      
+      // Reset form after a delay
+      setTimeout(() => {
+        setReservationDate('');
+        setPartySize(2);
+        setReservationTime('19:00');
+        setSpecialRequests('');
+        setShowConfirmation(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error making reservation:', error);
+      alert('There was an error processing your reservation. Please try again.');
+    }
+  };
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Dining & Ordering</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-1">
             {activeTab === 'delivery' 
               ? 'Get your favorite meals delivered to your location' 
               : activeTab === 'dine-in' 
-                ? 'Order food to be served at your table' 
-                : activeTab === 'reservation' 
+                ? 'Order food to be served at your table'
+                : activeTab === 'reservation'
                   ? 'Reserve a table for an exquisite dining experience'
                   : 'Explore our weekly menu specials'}
           </p>
         </div>
-        <div className="mt-4 md:mt-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full md:grid-cols-4 grid-cols-2 mb-8 gap-2">
-              <TabsTrigger value="menu" className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" />
-                Weekly Menu
-              </TabsTrigger>
-              <TabsTrigger value="dine-in" className="flex items-center gap-2">
-                <Utensils className="h-4 w-4" />
-                Dine In
-              </TabsTrigger>
-              <TabsTrigger value="delivery" className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                Delivery
-              </TabsTrigger>
-              <TabsTrigger value="reservation" className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                Make Reservation
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Menu Section */}
-        {activeTab === 'menu' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Menu Section */}
           <div className="lg:col-span-2">
-            <Card className="mb-6">
+            <Card>
               <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Today's Special</CardTitle>
-                    <CardDescription>{todaySpecial.day} - {todaySpecial.special}</CardDescription>
+                    <CardDescription>
+                      {currentWeekMenu.days[activeDay as keyof typeof currentWeekMenu.days].day} - {currentWeekMenu.days[activeDay as keyof typeof currentWeekMenu.days].special}
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {todaySpecial.items.map((item, index) => (
-                    <div key={`${item.name}-${index}`} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
-                            {item.isVeg && (
-                              <span className="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full">VEG</span>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{item.description}</p>
-                          <p className="font-medium text-primary">KSh {item.price.toLocaleString()}</p>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => removeFromCart(`special-${index}`, true)}
-                            disabled={!getCartItem(`special-${index}`, true)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-6 text-center">
-                            {getCartItem(`special-${index}`, true)}
-                          </span>
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => addToCart({
-                              id: `special-${index}`,
-                              name: item.name,
-                              price: item.price,
-                              isSpecial: true
-                            })}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeTab !== 'menu' && (
-          <div className="lg:col-span-2">
-            <Card className="mb-6">
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <CardTitle>Our Menu</CardTitle>
-                    <CardDescription>Select from our delicious offerings</CardDescription>
-                  </div>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter by category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="All">All Categories</SelectItem>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredItems.map(item => (
-                    <div key={item.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  {currentWeekMenu.days[activeDay as keyof typeof currentWeekMenu.days].items.map((item, index) => (
+                    <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
-                          <p className="mt-2 font-medium text-primary">KSh {item.price.toLocaleString()}</p>
+                          <h3 className="font-medium">{item.name}</h3>
+                          <p className="text-sm text-gray-500 mt-1">{item.description}</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => removeFromCart(item.id)}
-                            disabled={!getCartItem(item.id)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-6 text-center">{getCartItem(item.id)}</span>
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => addToCart(item.id)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <span className="font-medium">KSh {item.price.toLocaleString()}</span>
                       </div>
-                      {item.isVeg && (
-                        <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400 mt-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                          Vegetarian
-                        </span>
+                      {item.isChefSpecial && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Chef's Special
+                          </span>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -330,128 +560,128 @@ const DiningPage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        )}
 
-        {/* Order Summary */}
-        <div className="lg:sticky lg:top-6 lg:h-fit">
-          <Card className="border-primary/20">
-            <CardHeader className="bg-primary/5">
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                Order Summary
-              </CardTitle>
-              <CardDescription>
-                {activeTab === 'delivery' 
-                  ? 'Delivery order' 
-                  : activeTab === 'dine-in' 
-                    ? 'Table service order' 
-                    : activeTab === 'reservation' 
-                      ? 'Table reservation'
-                      : 'No order summary'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              {activeTab === 'delivery' && (
-                <div className="space-y-2">
-                  <Label htmlFor="delivery-address">Delivery Address</Label>
-                  <Input 
-                    id="delivery-address" 
-                    placeholder="Enter your delivery address" 
-                    value={deliveryAddress}
-                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {activeTab === 'dine-in' && (
-                <div className="space-y-2">
-                  <Label htmlFor="table-number">Table Number</Label>
-                  <Input 
-                    id="table-number" 
-                    placeholder="Enter your table number" 
-                    value={tableNumber}
-                    onChange={(e) => setTableNumber(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {activeTab === 'reservation' && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reservation-date">Date</Label>
-                      <Input 
-                        id="reservation-date" 
-                        type="date" 
-                        value={reservationDate}
-                        onChange={(e) => setReservationDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="reservation-time">Time</Label>
-                      <Input 
-                        id="reservation-time" 
-                        type="time" 
-                        value={reservationTime}
-                        onChange={(e) => setReservationTime(e.target.value)}
-                      />
-                    </div>
-                  </div>
+          {/* Order/Reservation Form */}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {activeTab === 'delivery' 
+                    ? 'Delivery Details'
+                    : activeTab === 'dine-in'
+                      ? 'Dine-in Order'
+                      : 'Table Reservation'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Delivery Address (only for delivery) */}
+                {activeTab === 'delivery' && (
                   <div className="space-y-2">
-                    <Label htmlFor="party-size">Party Size</Label>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => setPartySize(prev => Math.max(1, prev - 1))}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-8 text-center">{partySize}</span>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => setPartySize(prev => prev + 1)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <span className="text-sm text-gray-500 ml-2">people</span>
-                    </div>
+                    <Label htmlFor="delivery-address">Delivery Address</Label>
+                    <Input 
+                      id="delivery-address"
+                      placeholder="Enter your delivery address"
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Table Number (only for dine-in) */}
+                {activeTab === 'dine-in' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="table-number">Table Number</Label>
+                    <Input 
+                      id="table-number"
+                      placeholder="Enter your table number"
+                      value={tableNumber}
+                      onChange={(e) => setTableNumber(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Party Size (for all order types) */}
+                <div className="space-y-2">
+                  <Label htmlFor="party-size">
+                    {activeTab === 'delivery' ? 'Number of Meals' : 'Party Size'}
+                  </Label>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={() => handlePartySizeChange(false)}
+                      type="button"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="w-8 text-center">{partySize}</span>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={() => handlePartySizeChange(true)}
+                      type="button"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-gray-500 ml-2">
+                      {activeTab === 'delivery' ? 'meals' : 'people'}
+                    </span>
                   </div>
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="special-instructions">Special Instructions</Label>
-                <Input 
-                  id="special-instructions" 
-                  placeholder="Any special requests or dietary restrictions?" 
-                  value={specialInstructions}
-                  onChange={(e) => setSpecialInstructions(e.target.value)}
-                />
-              </div>
+                {/* Special Requests */}
+                <div className="space-y-2">
+                  <Label htmlFor="special-requests">
+                    {activeTab === 'reservation' ? 'Additional Notes' : 'Special Instructions'}
+                  </Label>
+                  <Input 
+                    id="special-requests" 
+                    placeholder={
+                      activeTab === 'reservation' 
+                        ? 'Any special requests or notes for your reservation?'
+                        : 'Any special requests or dietary restrictions?'
+                    }
+                    value={specialRequests}
+                    onChange={(e) => setSpecialRequests(e.target.value)}
+                  />
+                </div>
 
-              {cart.length > 0 && (
-                <div className="border-t pt-4 space-y-3">
-                  <h4 className="font-medium">Your Order</h4>
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                    {cart.map(cartItem => {
-                      const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
-                      if (!item) return null;
-                      return (
-                        <div key={cartItem.id} className="flex justify-between items-center text-sm">
-                          <div>
-                            <span className="font-medium">{cartItem.quantity}x</span> {item.name}
+                {/* Submit Button */}
+                <Button 
+                  className="w-full mt-4"
+                  onClick={handlePlaceOrder}
+                  disabled={cart.length === 0 && activeTab !== 'reservation'}
+                >
+                  {activeTab === 'delivery' 
+                    ? 'Place Delivery Order' 
+                    : activeTab === 'dine-in' 
+                      ? 'Place Dine-in Order'
+                      : 'Make Reservation'}
+                </Button>
+
+                {/* Cart Summary */}
+                {cart.length > 0 && (
+                  <div className="mt-6 border-t pt-4 space-y-3">
+                    <h4 className="font-medium">Your Order</h4>
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                      {cart.map(cartItem => {
+                        const item = menuItems.find(menuItem => menuItem.id === cartItem.id);
+                        if (!item) return null;
+                        return (
+                          <div key={cartItem.id} className="flex justify-between items-center text-sm">
+                            <div>
+                              <span className="font-medium">{cartItem.quantity}x</span> {item.name}
+                            </div>
+                            <div className="font-medium">
+                              KSh {(item.price * cartItem.quantity).toLocaleString()}
+                            </div>
                           </div>
-                          <div className="font-medium">
-                            KSh {(item.price * cartItem.quantity).toLocaleString()}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                   <div className="border-t pt-2 flex justify-between font-medium">
                     <span>Total</span>
@@ -464,20 +694,28 @@ const DiningPage: React.FC = () => {
                 className="w-full mt-4" 
                 size="lg"
                 onClick={handlePlaceOrder}
-                disabled={cart.length === 0}
+                disabled={activeTab === 'reservation' ? false : cart.length === 0}
               >
-                {activeTab === 'reservation' ? 'Reserve Table' : 'Place Order'}
+                {activeTab === 'reservation' 
+                  ? 'Make Reservation' 
+                  : activeTab === 'delivery' 
+                    ? 'Place Delivery Order' 
+                    : activeTab === 'dine-in'
+                      ? 'Order Now'
+                      : 'Place Order'}
               </Button>
 
               <div className="flex items-center text-xs text-muted-foreground mt-2">
-                <Clock className="h-3 w-3 mr-1" />
-                {activeTab === 'delivery' 
-                  ? 'Delivery time: 30-45 min' 
-                  : activeTab === 'dine-in' 
-                    ? 'Food will be served at your table' 
-                    : activeTab === 'reservation' 
-                      ? 'Reservation will be confirmed shortly'
-                      : ''}
+                <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
+                <span>
+                  {activeTab === 'delivery' 
+                    ? 'Delivery time: 30-45 min' 
+                    : activeTab === 'dine-in' 
+                      ? 'Food will be served at your table' 
+                      : activeTab === 'reservation' 
+                        ? 'Reservation will be confirmed shortly'
+                        : ''}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -487,30 +725,31 @@ const DiningPage: React.FC = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Restaurant Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <CardContent className="space-y-4 text-sm">
               <div className="flex items-start">
-                <MapPin className="h-4 w-4 mt-0.5 mr-2 text-primary" />
+                <MapPin className="h-4 w-4 mt-0.5 mr-2 text-primary flex-shrink-0" />
                 <div>
                   <p className="font-medium">Eldoret Golf Club Restaurant</p>
                   <p className="text-muted-foreground">Eldoret-Nairobi Highway, Eldoret, Kenya</p>
                 </div>
               </div>
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-primary" />
+              <div className="flex items-start">
+                <Clock className="h-4 w-4 mt-0.5 mr-2 text-primary flex-shrink-0" />
                 <div>
                   <p className="font-medium">Opening Hours</p>
                   <p className="text-muted-foreground">Mon-Sun: 7:00 AM - 10:00 PM</p>
                 </div>
               </div>
-              <div className="flex items-center">
-                <Phone className="h-4 w-4 mr-2 text-primary" />
+              <div className="flex items-start">
+                <Phone className="h-4 w-4 mt-0.5 mr-2 text-primary flex-shrink-0" />
                 <div>
                   <p className="font-medium">Contact</p>
                   <p className="text-muted-foreground">+254 712 345 678</p>
                 </div>
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

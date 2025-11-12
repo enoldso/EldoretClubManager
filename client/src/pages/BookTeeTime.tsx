@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Calendar, Clock, MapPin, Users, ChevronDown, ChevronUp, Check, X, User, Plus, Minus } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, ChevronDown, ChevronUp, Check, X, User, Plus, Minus, UserCheck } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 type Course = {
   id: number;
@@ -31,6 +32,58 @@ const BookTeeTime: React.FC = () => {
   const [showCourseDropdown, setShowCourseDropdown] = useState(false);
   const [showTimeSlots, setShowTimeSlots] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [caddies, setCaddies] = useState<Array<{id: string; name: string; rate: number}>>([]);
+  const [selectedCaddie, setSelectedCaddie] = useState<string | null>(null);
+  const [showCaddieDropdown, setShowCaddieDropdown] = useState(false);
+  const { toast } = useToast();
+  const CADDIE_RATE = 50; // Base rate per caddie
+
+  // Fetch available caddies
+  const [isLoadingCaddies, setIsLoadingCaddies] = useState(false);
+  const [caddieError, setCaddieError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCaddies = async () => {
+      setIsLoadingCaddies(true);
+      setCaddieError(null);
+      try {
+        const response = await fetch('/api/caddies/available');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch caddies: ${response.statusText}`);
+        }
+        const data = await response.json();
+        
+        // If no caddies are available, show a message
+        if (!data || data.length === 0) {
+          setCaddieError('No caddies are currently available. Please check back later.');
+          setCaddies([]);
+          return;
+        }
+        
+        // Map the caddie data to the expected format
+        setCaddies(data.map((caddie: any) => ({
+          id: caddie.id,
+          name: caddie.name,
+          rate: CADDIE_RATE // In a real app, this could come from the caddie's data
+        })));
+      } catch (error) {
+        console.error('Error fetching caddies:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        setCaddieError(`Error loading caddies: ${errorMessage}. Using default caddie data.`);
+        // Fallback to default caddies if API fails
+        setCaddies([
+          { id: '1', name: 'James Kipchoge', rate: 50 },
+          { id: '2', name: 'Peter Kimutai', rate: 60 },
+          { id: '3', name: 'David Korir', rate: 45 },
+          { id: '4', name: 'Michael Ruto', rate: 55 },
+        ]);
+      } finally {
+        setIsLoadingCaddies(false);
+      }
+    };
+
+    fetchCaddies();
+  }, []);
 
   // Dummy data for courses
   const courses: Course[] = [
@@ -112,12 +165,51 @@ const BookTeeTime: React.FC = () => {
     setShowTimeSlots(true);
   };
 
-  const handleBookNow = () => {
+  const handleBookNow = async () => {
     if (selectedCourse && selectedDate && selectedTime) {
-      // In a real app, this would submit the booking
-      alert(`Booking confirmed for ${selectedCourse.name} on ${selectedDate} at ${selectedTime}`);
-      navigate('/dashboard');
+      try {
+        // In a real app, this would submit the booking with caddie info
+        const bookingData = {
+          course: selectedCourse.name,
+          date: selectedDate,
+          time: selectedTime,
+          players,
+          caddie: selectedCaddie ? caddies.find(c => c.id === selectedCaddie)?.name : 'None',
+          totalCost: calculateTotal()
+        };
+        
+        console.log('Booking data:', bookingData);
+        
+        // Simulate API call
+        // const response = await fetch('/api/bookings', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(bookingData)
+        // });
+        
+        // if (!response.ok) throw new Error('Booking failed');
+        
+        toast({
+          title: 'Booking Confirmed!',
+          description: `Your tee time at ${selectedTime} on ${new Date(selectedDate).toLocaleDateString()} has been booked.`,
+        });
+        
+        navigate('/dashboard');
+      } catch (error) {
+        console.error('Booking error:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Booking Failed',
+          description: 'There was an error processing your booking. Please try again.',
+        });
+      }
     }
+  };
+
+  const calculateTotal = () => {
+    const courseCost = selectedCourse ? selectedCourse.price * players : 0;
+    const caddieCost = selectedCaddie ? CADDIE_RATE * players : 0;
+    return courseCost + caddieCost;
   };
 
   // Generate next 7 days for date selection
@@ -346,10 +438,79 @@ const BookTeeTime: React.FC = () => {
               <span className="text-gray-600 dark:text-gray-300">Players</span>
               <span className="font-medium">{players} {players === 1 ? 'player' : 'players'}</span>
             </div>
-            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex justify-between font-medium text-lg">
-                <span>Total</span>
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              <span>Caddie</span>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCaddieDropdown(!showCaddieDropdown)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 min-w-[180px] text-left justify-between"
+                  disabled={isLoadingCaddies || (caddies.length === 0 && !caddieError)}
+                >
+                  {isLoadingCaddies ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+                      Loading...
+                    </span>
+                  ) : selectedCaddie ? (
+                    <span className="truncate">
+                      {caddies.find((c) => c.id === selectedCaddie)?.name}
+                    </span>
+                  ) : (
+                    <span>Select caddie</span>
+                  )}
+                  {!isLoadingCaddies && (
+                    showCaddieDropdown ? <ChevronUp className="h-4 w-4 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  )}
+                </button>
+                
+                {showCaddieDropdown && caddies.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {caddies.map((caddie) => (
+                      <div
+                        key={caddie.id}
+                        onClick={() => {
+                          setSelectedCaddie(caddie.id);
+                          setShowCaddieDropdown(false);
+                        }}
+                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                          selectedCaddie === caddie.id ? 'bg-blue-50 dark:bg-blue-900' : ''
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span>{caddie.name}</span>
+                          <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">
+                            ${caddie.rate}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {caddieError && (
+                <div className="ml-2 text-xs text-yellow-600 dark:text-yellow-400">
+                  {caddies.length > 0 ? 'Using fallback data' : 'No caddies available'}
+                  No caddies available at the moment. Please check back later.
+                </div>
+              )}
+            </div>
+            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Green Fees ({players} {players === 1 ? 'player' : 'players'})</span>
                 <span>${(selectedCourse.price * players).toFixed(2)}</span>
+              </div>
+              {selectedCaddie && (
+                <div className="flex justify-between text-sm">
+                  <span>Caddie Fees ({players} {players === 1 ? 'caddie' : 'caddies'})</span>
+                  <span>${(CADDIE_RATE * players).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-medium text-lg pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
+                <span>Total</span>
+                <span>${calculateTotal().toFixed(2)}</span>
               </div>
             </div>
             <button

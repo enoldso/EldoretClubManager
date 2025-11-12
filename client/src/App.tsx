@@ -14,6 +14,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AddMemberPage from "@/pages/AddMemberPage";
 import BookingPage from "@/pages/BookingPage";
 import BookTeeTime from "@/pages/BookTeeTime";
+import MyBookings from "@/pages/MyBookings";
 import DiningPage from "@/pages/DiningPage";
 import EventsPage from "@/pages/EventsPage";
 import LoyaltyPage from "@/pages/LoyaltyPage";
@@ -68,7 +69,8 @@ function Router({ userType }: { userType: "member" | "admin" }) {
         <>
           <Route path="/dashboard" component={MemberDashboard} />
           <Route path="/book-tee-time" component={BookTeeTime} />
-          <Route path="/my-bookings" component={BookingPage} />
+          <Route path="/my-bookings" component={MyBookings} />
+          <Route path="/booking" component={BookingPage} />
           <Route path="/dining" component={DiningPage} />
           <Route path="/events" component={EventsPage} />
           <Route path="/academy" component={GolfAcademy} />

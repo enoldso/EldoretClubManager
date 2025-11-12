@@ -100,12 +100,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Caddie routes
+  // Caddies
   app.get("/api/caddies", isAuthenticated, async (req, res) => {
     try {
       const caddies = await storage.getAllCaddies();
       res.json(caddies);
     } catch (error) {
+      console.error("Error fetching caddies:", error);
       res.status(500).json({ message: "Failed to fetch caddies" });
     }
   });
@@ -115,6 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const caddies = await storage.getAvailableCaddies();
       res.json(caddies);
     } catch (error) {
+      console.error("Error fetching available caddies:", error);
       res.status(500).json({ message: "Failed to fetch available caddies" });
     }
   });

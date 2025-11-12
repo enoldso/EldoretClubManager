@@ -53,7 +53,7 @@ type InvitedMember = {
 export default function BookingPage() {
   const navigate = useNavigate();
   const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time: string } | null>(null);
-  const [selectedCaddie, setSelectedCaddie] = useState<string | null>(null);
+  const [selectedCaddies, setSelectedCaddies] = useState<string[]>([]);
   const [partySize, setPartySize] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,12 +88,26 @@ export default function BookingPage() {
     setInvitedMembers(prev => prev.filter(m => m.id !== memberId));
   };
 
+  const calculateCaddieFees = () => {
+    const caddieRates = {
+      "1": 50, // James Kipchoge
+      "2": 60, // Peter Kimutai
+      "3": 45, // David Korir
+      "4": 55  // Michael Ruto
+    };
+    
+    return selectedCaddies.reduce((total, caddieId) => {
+      return total + (caddieRates[caddieId as keyof typeof caddieRates] || 0);
+    }, 0);
+  };
+
   const handleBooking = () => {
-    if (selectedSlot && selectedCaddie) {
+    if (selectedSlot && selectedCaddies.length > 0) {
       setShowConfirmation(true);
       console.log('Booking confirmed:', { 
         selectedSlot, 
-        selectedCaddie, 
+        selectedCaddies,
+        caddieFees: calculateCaddieFees(),
         partySize, 
         invitedMembers 
       });
@@ -210,7 +224,11 @@ export default function BookingPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <BookingCalendar onSelectSlot={(date, time) => setSelectedSlot({ date, time })} />
-          <CaddieSelector onSelectCaddie={setSelectedCaddie} />
+          <CaddieSelector 
+            selectedCaddies={selectedCaddies}
+            onSelectCaddies={setSelectedCaddies}
+            maxSelections={partySize + invitedMembers.length}
+          />
         </div>
 
         <div className="lg:col-span-1">
@@ -253,14 +271,32 @@ export default function BookingPage() {
                     <span className="text-muted-foreground">Not selected</span>
                   )}
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Caddie</span>
-                  {selectedCaddie ? (
-                    <Badge variant="outline">Selected</Badge>
-                  ) : (
-                    <span className="text-muted-foreground">Not selected</span>
-                  )}
-                </div>
+                {selectedCaddies.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Caddies</span>
+                      <Badge variant="outline">{selectedCaddies.length} selected</Badge>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      {Array.from(new Set(selectedCaddies)).map(caddieId => {
+                        const caddie = [
+                          { id: "1", name: "James Kipchoge", rate: 50 },
+                          { id: "2", name: "Peter Kimutai", rate: 60 },
+                          { id: "3", name: "David Korir", rate: 45 },
+                          { id: "4", name: "Michael Ruto", rate: 55 },
+                        ].find(c => c.id === caddieId);
+                        if (!caddie) return null;
+                        const count = selectedCaddies.filter(id => id === caddieId).length;
+                        return (
+                          <div key={caddieId} className="flex justify-between pl-2">
+                            <span className="text-muted-foreground">{caddie.name} ×{count}</span>
+                            <span>${(caddie.rate * count).toFixed(2)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 border-t">
@@ -323,7 +359,7 @@ export default function BookingPage() {
                 className="w-full mt-4" 
                 size="lg"
                 onClick={handleBooking}
-                disabled={!selectedSlot || !selectedCaddie}
+                disabled={!selectedSlot || selectedCaddies.length === 0}
               >
                 {invitedMembers.length > 0 ? 'Confirm Booking & Send Invites' : 'Confirm Booking'}
               </Button>
